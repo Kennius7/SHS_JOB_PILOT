@@ -1,0 +1,60 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Briefcase } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
+import { ApiError } from '@/lib/api';
+
+const schema = z.object({ email: z.string().email(), password: z.string().min(8) });
+type FormValues = z.infer<typeof schema>;
+
+export default function LoginPage() {
+  const router = useRouter();
+  const { login } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const { register, handleSubmit, formState } = useForm<FormValues>({ resolver: zodResolver(schema) });
+
+  async function onSubmit(values: FormValues) {
+    setError(null);
+    try {
+      await login(values.email, values.password);
+      router.push('/dashboard');
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Sign-in failed');
+    }
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+      <div className="w-full max-w-sm">
+        <div className="mb-8 flex items-center justify-center gap-2">
+          <Briefcase className="h-6 w-6 text-brand-600" />
+          <span className="text-lg font-semibold">SHS Job Pilot</span>
+        </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="card space-y-4">
+          <h1 className="text-xl font-semibold">Sign in</h1>
+          <div>
+            <label className="label" htmlFor="email">Email</label>
+            <input id="email" type="email" autoComplete="email" {...register('email')} className="input" />
+          </div>
+          <div>
+            <label className="label" htmlFor="password">Password</label>
+            <input id="password" type="password" autoComplete="current-password" {...register('password')} className="input" />
+          </div>
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <button type="submit" disabled={formState.isSubmitting} className="btn-primary w-full">
+            {formState.isSubmitting ? 'Signing in…' : 'Sign in'}
+          </button>
+          <p className="text-center text-sm text-slate-600">
+            No account? <Link href="/register" className="text-brand-600 hover:underline">Create one</Link>
+          </p>
+        </form>
+      </div>
+    </div>
+  );
+}
