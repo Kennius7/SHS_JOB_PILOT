@@ -117,9 +117,13 @@ cp .env.example .env
 
 npm install
 docker compose up -d
-npm run prisma:migrate -- --name init
+npm run prisma:deploy   # apply committed migrations
+npm run db:seed         # optional: demo users, profile, rule, sample jobs
 npm run dev
 ```
+
+The seed creates `admin@example.com` and `demo@example.com` (password `Password123!`,
+override with `SEED_PASSWORD`). It refuses to run when `NODE_ENV=production`.
 
 ## Scripts
 

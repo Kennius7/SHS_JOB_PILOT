@@ -1,12 +1,16 @@
 import Link from 'next/link';
 import { Briefcase, Bot, FileCheck, Shield } from 'lucide-react';
+import Image from 'next/image';
+import logo from '../../public/img/SHS_Job_Pilot_Logo1.png';
+
 
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       <header className="mx-auto flex max-w-6xl items-center justify-between p-6">
         <div className="flex items-center gap-2">
-          <Briefcase className="h-6 w-6 text-brand-600" />
+          {/* <Briefcase className="h-6 w-6 text-brand-600" /> */}
+          <Image src={logo} alt="SHS Job Pilot Logo" width={20} height={20} className="" />
           <span className="text-lg font-semibold">SHS Job Pilot</span>
         </div>
         <nav className="flex items-center gap-4 text-sm">

@@ -16,7 +16,7 @@ export function RulesStep() {
     const hard: any[] = [];
     const soft: any[] = [{ type: 'POSTED_WITHIN_DAYS', days: postedWithin }];
     if (excludedCompanies.trim()) {
-      hard.push({ type: 'EMPLOYER_NOT_IN', employers: excludedCompanies.split(',').map((s) => s.trim()).filter(Boolean) });
+      hard.push({ type: 'EMPLOYER_NOT_IN', employers: excludedCompanies.split(',').map((s: string) => s.trim()).filter(Boolean) });
     }
     await api.post('/v1/rules', {
       name: 'Default rule',

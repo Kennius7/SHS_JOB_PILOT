@@ -7,7 +7,13 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
  * Property names should be short; deep nesting should be avoided.
  */
 export function toGeminiSchema(schema: z.ZodTypeAny): Record<string, unknown> {
-  const json = zodToJsonSchema(schema, { target: 'jsonSchema7' }) as Record<string, unknown>;
+  // The zod-to-json-schema generics can exceed the compiler's instantiation
+  // depth for complex schemas; erase the type parameter while keeping runtime
+  // behavior identical.
+  const json = (zodToJsonSchema as unknown as (
+    s: z.ZodTypeAny,
+    o: { target: string },
+  ) => Record<string, unknown>)(schema, { target: 'jsonSchema7' });
   return sanitize(json);
 }
 

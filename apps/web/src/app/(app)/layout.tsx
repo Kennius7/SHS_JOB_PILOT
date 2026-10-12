@@ -31,6 +31,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     enabled: !!user && !isOnboarding,
   });
 
+  const { data: notif } = useQuery({
+    queryKey: ['notif-count'],
+    queryFn: () => api.get<{ unreadCount: number }>('/v1/notifications/unread-count'),
+    enabled: !!user && !isOnboarding,
+    refetchInterval: 60_000,
+  });
+
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
   }, [loading, user, router]);
@@ -89,6 +96,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </h1>
           <Link href="/notifications" className="relative rounded-lg p-2 hover:bg-slate-100">
             <Bell className="h-5 w-5 text-slate-600" />
+            {(notif?.unreadCount ?? 0) > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-semibold text-white">
+                {notif!.unreadCount > 9 ? '9+' : notif!.unreadCount}
+              </span>
+            )}
           </Link>
         </header>
         <main className="p-6">{children}</main>

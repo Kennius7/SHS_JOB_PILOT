@@ -21,7 +21,7 @@ export function PreferencesStep() {
       preferredStates, remoteOnly,
       salaryFloor: salaryFloor === '' ? undefined : Number(salaryFloor),
       salaryCurrency: 'NGN', employmentTypes,
-      excludedCompanies: excludedCompanies.split(',').map((s) => s.trim()).filter(Boolean),
+      excludedCompanies: excludedCompanies.split(',').map((s: string) => s.trim()).filter(Boolean),
       maxApplicationsPerDay: maxPerDay, minMatchScore,
     });
     setSaving(false); next();

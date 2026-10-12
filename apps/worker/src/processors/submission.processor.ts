@@ -16,6 +16,7 @@ export class SubmissionProcessor extends WorkerHost {
     private prisma: PrismaService,
     private transitions: TransitionsService,
     private providers: ProvidersService,
+    @InjectQueue(QUEUES.submission) private submissionQueue: Queue,
     @InjectQueue(QUEUES.verification) private verificationQueue: Queue,
   ) { super(); }
 
@@ -61,7 +62,7 @@ export class SubmissionProcessor extends WorkerHost {
       return { failed: 'no-provider-submission' };
     }
 
-    const coverLetter = app.materials.find((m) => m.kind === 'COVER_LETTER')?.content;
+    const coverLetter = app.materials.find((m) => m.kind === 'COVER_LETTER')?.content ?? undefined;
     const resumeDoc = await this.prisma.document.findFirst({
       where: { userId: app.userId, kind: 'CV', deletedAt: null },
       orderBy: { createdAt: 'desc' },
@@ -126,7 +127,7 @@ export class SubmissionProcessor extends WorkerHost {
         await this.transitions.transition(applicationId, 'QUEUED', {
           note: `Retry scheduled (attempt ${attemptNumber}/${MAX_RETRY_ATTEMPTS})`,
         });
-        await job.queue.add('submit', { applicationId }, {
+        await this.submissionQueue.add('submit', { applicationId }, {
           delay: RETRY_BACKOFF_MS[attemptNumber - 1] ?? RETRY_BACKOFF_MS[0],
         });
       } else {
@@ -145,7 +146,7 @@ export class SubmissionProcessor extends WorkerHost {
         });
       } else if (attemptNumber < MAX_RETRY_ATTEMPTS) {
         await this.transitions.transition(applicationId, 'QUEUED', { note: 'Retry after network error' });
-        await job.queue.add('submit', { applicationId }, {
+        await this.submissionQueue.add('submit', { applicationId }, {
           delay: RETRY_BACKOFF_MS[attemptNumber - 1] ?? RETRY_BACKOFF_MS[0],
         });
       } else {
@@ -157,7 +158,7 @@ export class SubmissionProcessor extends WorkerHost {
 }
 
 async function markAttempt(prisma: PrismaService, key: string, outcome: any, data: any) {
-  await prisma.applicationAttempt.update({
+  await prisma.applicationAttempt.updateMany({
     where: { idempotencyKey: key },
     data: { outcome, finishedAt: new Date(), ...data },
   });
