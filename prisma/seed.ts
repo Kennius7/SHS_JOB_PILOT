@@ -18,20 +18,19 @@ function assertNotProduction() {
 }
 
 async function seedProviders() {
-  const adzunaConfigured = !!(process.env.PROVIDER_ADZUNA_APP_ID && process.env.PROVIDER_ADZUNA_APP_KEY);
+  const env = process.env;
+  const configured = (b: boolean) => b;
 
-  await prisma.jobProvider.upsert({
-    where: { key: 'adzuna' },
-    update: { configured: adzunaConfigured },
-    create: {
+  const entries = [
+    {
       key: 'adzuna',
       displayName: 'Adzuna',
-      accessMode: 'PUBLIC_API',
-      enabled: process.env.PROVIDER_ADZUNA_ENABLED !== 'false',
-      configured: adzunaConfigured,
+      accessMode: 'PUBLIC_API' as const,
+      enabled: env.PROVIDER_ADZUNA_ENABLED !== 'false',
+      configured: configured(!!(env.PROVIDER_ADZUNA_APP_ID && env.PROVIDER_ADZUNA_APP_KEY)),
       capabilities: {
         searchJobs: true,
-        retrieveJobDetails: false,
+        retrieveJobDetails: true,
         submitApplications: false,
         verifySubmission: false,
         supportsPagination: true,
@@ -40,15 +39,129 @@ async function seedProviders() {
         accessMode: 'PUBLIC_API',
       },
     },
-  });
-
-  await prisma.jobProvider.upsert({
-    where: { key: 'mock-submission' },
-    update: {},
-    create: {
+    {
+      key: 'jooble',
+      displayName: 'Jooble',
+      accessMode: 'PUBLIC_API' as const,
+      enabled: env.PROVIDER_JOOBLE_ENABLED !== 'false',
+      configured: configured(!!env.PROVIDER_JOOBLE_API_KEY),
+      capabilities: {
+        searchJobs: true,
+        retrieveJobDetails: true,
+        submitApplications: false,
+        verifySubmission: false,
+        supportsPagination: true,
+        requiresCredentials: true,
+        requiresEmployerAuthorization: false,
+        accessMode: 'PUBLIC_API',
+      },
+    },
+    {
+      key: 'usajobs',
+      displayName: 'USAJOBS',
+      accessMode: 'PUBLIC_API' as const,
+      enabled: env.PROVIDER_USAJOBS_ENABLED !== 'false',
+      configured: configured(!!(env.PROVIDER_USAJOBS_API_KEY && env.PROVIDER_USAJOBS_EMAIL)),
+      capabilities: {
+        searchJobs: true,
+        retrieveJobDetails: true,
+        submitApplications: false,
+        verifySubmission: false,
+        supportsPagination: true,
+        requiresCredentials: true,
+        requiresEmployerAuthorization: false,
+        accessMode: 'PUBLIC_API',
+      },
+    },
+    {
+      key: 'remotive',
+      displayName: 'Remotive',
+      accessMode: 'PUBLIC_API' as const,
+      enabled: env.PROVIDER_REMOTIVE_ENABLED !== 'false',
+      configured: true,
+      capabilities: {
+        searchJobs: true,
+        retrieveJobDetails: true,
+        submitApplications: false,
+        verifySubmission: false,
+        supportsPagination: true,
+        requiresCredentials: false,
+        requiresEmployerAuthorization: false,
+        accessMode: 'PUBLIC_API',
+      },
+    },
+    {
+      key: 'remoteok',
+      displayName: 'Remote OK',
+      accessMode: 'PUBLIC_API' as const,
+      enabled: env.PROVIDER_REMOTEOK_ENABLED !== 'false',
+      configured: true,
+      capabilities: {
+        searchJobs: true,
+        retrieveJobDetails: true,
+        submitApplications: false,
+        verifySubmission: false,
+        supportsPagination: false,
+        requiresCredentials: false,
+        requiresEmployerAuthorization: false,
+        accessMode: 'PUBLIC_API',
+      },
+    },
+    {
+      key: 'greenhouse',
+      displayName: 'Greenhouse (boards)',
+      accessMode: 'PUBLIC_API' as const,
+      enabled: env.PROVIDER_GREENHOUSE_ENABLED !== 'false',
+      configured: configured(!!env.PROVIDER_GREENHOUSE_BOARD),
+      capabilities: {
+        searchJobs: true,
+        retrieveJobDetails: true,
+        submitApplications: false,
+        verifySubmission: false,
+        supportsPagination: true,
+        requiresCredentials: false,
+        requiresEmployerAuthorization: false,
+        accessMode: 'PUBLIC_API',
+      },
+    },
+    {
+      key: 'lever',
+      displayName: 'Lever (boards)',
+      accessMode: 'PUBLIC_API' as const,
+      enabled: env.PROVIDER_LEVER_ENABLED !== 'false',
+      configured: configured(!!env.PROVIDER_LEVER_COMPANY),
+      capabilities: {
+        searchJobs: true,
+        retrieveJobDetails: true,
+        submitApplications: false,
+        verifySubmission: false,
+        supportsPagination: false,
+        requiresCredentials: false,
+        requiresEmployerAuthorization: false,
+        accessMode: 'PUBLIC_API',
+      },
+    },
+    {
+      key: 'ashby',
+      displayName: 'Ashby (boards)',
+      accessMode: 'PUBLIC_API' as const,
+      enabled: env.PROVIDER_ASHBY_ENABLED !== 'false',
+      configured: configured(!!env.PROVIDER_ASHBY_ORG),
+      capabilities: {
+        searchJobs: true,
+        retrieveJobDetails: true,
+        submitApplications: false,
+        verifySubmission: false,
+        supportsPagination: false,
+        requiresCredentials: false,
+        requiresEmployerAuthorization: false,
+        accessMode: 'PUBLIC_API',
+      },
+    },
+    {
       key: 'mock-submission',
       displayName: 'Mock Submission Provider (dev only)',
-      accessMode: 'AUTHORIZED_API',
+      accessMode: 'AUTHORIZED_API' as const,
       enabled: true,
       configured: true,
       capabilities: {
@@ -62,7 +175,28 @@ async function seedProviders() {
         accessMode: 'AUTHORIZED_API',
       },
     },
-  });
+  ];
+
+  for (const entry of entries) {
+    await prisma.jobProvider.upsert({
+      where: { key: entry.key },
+      update: {
+        displayName: entry.displayName,
+        accessMode: entry.accessMode,
+        enabled: entry.enabled,
+        configured: entry.configured,
+        capabilities: entry.capabilities as any,
+      },
+      create: {
+        key: entry.key,
+        displayName: entry.displayName,
+        accessMode: entry.accessMode,
+        enabled: entry.enabled,
+        configured: entry.configured,
+        capabilities: entry.capabilities as any,
+      },
+    });
+  }
 
   const manual = [
     { key: 'linkedin', displayName: 'LinkedIn Jobs' },
@@ -93,7 +227,7 @@ async function seedProviders() {
     });
   }
 
-  console.log('  providers: adzuna, mock-submission, linkedin, indeed, jobberman');
+  console.log(`  providers: ${entries.map((e) => e.key).join(', ')}, linkedin, indeed, jobberman`);
 }
 
 async function seedUsers() {

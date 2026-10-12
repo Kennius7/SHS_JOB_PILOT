@@ -2,7 +2,10 @@ import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { PrismaService } from '@shs/data';
+import { ProvidersService } from '../providers/providers.service';
 import { QUEUES } from '../worker.module';
+
+const SYNC_CRON = '0 */6 * * *';
 
 @Injectable()
 export class SchedulerService implements OnModuleInit {
@@ -10,22 +13,31 @@ export class SchedulerService implements OnModuleInit {
 
   constructor(
     private prisma: PrismaService,
-    @InjectQueue(QUEUES.adzunaSync) private adzunaQueue: Queue,
+    private providers: ProvidersService,
+    @InjectQueue(QUEUES.providerSync) private providerSyncQueue: Queue,
     @InjectQueue(QUEUES.matchRecent) private matchQueue: Queue,
   ) {}
 
   async onModuleInit() {
-    await this.adzunaQueue.add(
-      'sync',
-      {},
-      {
-        repeat: { pattern: '0 */6 * * *' },
-        jobId: 'adzuna-sync-cron',
-        removeOnComplete: 20,
-        removeOnFail: 50,
-      },
-    );
-    this.logger.log('Scheduled recurring jobs');
+    const searchProviders = this.providers
+      .registry_()
+      .list()
+      .filter((p) => p.capabilities.searchJobs);
+
+    for (const provider of searchProviders) {
+      await this.providerSyncQueue.add(
+        'sync',
+        { providerKey: provider.key },
+        {
+          repeat: { pattern: SYNC_CRON },
+          jobId: `provider-sync-${provider.key}`,
+          removeOnComplete: 20,
+          removeOnFail: 50,
+        },
+      );
+    }
+
+    this.logger.log(`Scheduled recurring sync for ${searchProviders.length} providers`);
   }
 
   /** Enqueue one match-recent job per active user. */

@@ -4,7 +4,7 @@ import { Queue } from 'bullmq';
 import { PrismaService } from '@shs/data';
 
 const QUEUE_NAMES = [
-  'adzuna-sync',
+  'provider-sync',
   'match-recent',
   'prepare-application',
   'application-submission',
@@ -17,14 +17,14 @@ export class AdminOpsService {
 
   constructor(
     private prisma: PrismaService,
-    @InjectQueue('adzuna-sync') adzunaSync: Queue,
+    @InjectQueue('provider-sync') providerSync: Queue,
     @InjectQueue('match-recent') matchRecent: Queue,
     @InjectQueue('prepare-application') prepareApplication: Queue,
     @InjectQueue('application-submission') applicationSubmission: Queue,
     @InjectQueue('application-verification') applicationVerification: Queue,
   ) {
     this.queueMap = {
-      'adzuna-sync': adzunaSync,
+      'provider-sync': providerSync,
       'match-recent': matchRecent,
       'prepare-application': prepareApplication,
       'application-submission': applicationSubmission,
@@ -97,14 +97,15 @@ export class AdminOpsService {
   }
 
   async triggerSync(key: string) {
-    if (key !== 'adzuna') {
-      throw new BadRequestException(`No automated sync available for provider "${key}"`);
-    }
     const provider = await this.prisma.jobProvider.findUnique({ where: { key } });
     if (!provider) throw new BadRequestException(`Provider "${key}" is not registered`);
-    const job = await this.queueMap['adzuna-sync'].add(
+    const caps = (provider.capabilities ?? {}) as { searchJobs?: boolean };
+    if (!caps.searchJobs) {
+      throw new BadRequestException(`Provider "${key}" does not support automated job sync`);
+    }
+    const job = await this.queueMap['provider-sync'].add(
       'manual',
-      { triggeredBy: 'admin' },
+      { providerKey: key, triggeredBy: 'admin' },
       { jobId: `admin-sync-${Date.now()}`, removeOnComplete: 100, removeOnFail: 200 },
     );
     return { queued: true, jobId: job.id, providerKey: key };

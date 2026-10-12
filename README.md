@@ -30,15 +30,17 @@ packages/
   shared/        Application lifecycle state machine (14 states)
   rules/         Deterministic eligibility engine (Zod schemas)
   ai/            Gemini adapter + USD budget guardrails
-  provider-sdk/  Job-source contracts + Adzuna/mock adapters
+  provider-sdk/  Job-source contracts + Adzuna/Jooble/Remotive/RemoteOK/USAJOBS +
+                Greenhouse/Lever/Ashby board adapters
   data/          Prisma + NestJS services (persistence/orchestration)
 prisma/schema.prisma   Full data model
 ```
 
 ### Application pipeline (BullMQ queues)
 
-1. **`adzuna-sync`** — every 6 hours, pulls Nigerian jobs from Adzuna, dedupes
-   by `canonicalKey`, then fans out `match-recent` per active user.
+1. **`provider-sync`** — every 6 hours, pulls listings from every configured,
+   search-capable provider (one repeatable job per provider key), dedupes by
+   `canonicalKey`, then fans out `match-recent` per active user.
 2. **`match-recent`** — evaluates up to 500 jobs per user with the `@shs/rules`
    engine against the user's single active rule, creates `Application` rows,
    and enqueues `prepare-application`.
@@ -79,7 +81,8 @@ Authenticated UI with client-side route guards:
 - 8-step onboarding wizard (CV upload → parse → contact → career → skills →
   preferences → rules → done)
 
-`settings` and `notifications` pages are placeholders.
+`settings` (account, automation controls, AI usage) and `notifications` (inbox +
+unread badge) render real API data.
 
 ## Packages
 
@@ -92,8 +95,11 @@ Authenticated UI with client-side route guards:
   Zod structured output, prompt-injection hardening, and per-user/platform USD
   budget caps. Mocks when no key is configured.
 - **`@shs/provider-sdk`** — zero-dependency contracts for job providers
-  (search, details, submission, verification) with Adzuna and mock adapters.
-  Encodes access modes, including `MANUAL_LINK_ONLY` for terms-restricted sites.
+  (search, details, submission, verification). Ships adapters for Adzuna,
+  Jooble, Remotive, Remote OK, and USAJOBS plus Greenhouse / Lever / Ashby
+  employer job boards, along with a mock submission provider for pipeline
+  tests. Encodes access modes, including `MANUAL_LINK_ONLY` for
+  terms-restricted sites (LinkedIn, Indeed, Jobberman).
 - **`@shs/data`** — global NestJS module wrapping Prisma and exposing
   `TransitionsService` (row-locked atomic transitions), `ApplicationsService`
   (submission guards: caps, duplicates, automation flags, provider capability),

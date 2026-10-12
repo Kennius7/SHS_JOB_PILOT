@@ -6,7 +6,7 @@ import { AdminOpsService } from './admin-ops.service';
 @Module({
   imports: [
     BullModule.registerQueue(
-      { name: 'adzuna-sync' },
+      { name: 'provider-sync' },
       { name: 'match-recent' },
       { name: 'prepare-application' },
       { name: 'application-submission' },

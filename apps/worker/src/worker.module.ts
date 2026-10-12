@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { DataModule } from '@shs/data';
 import { ProvidersModule } from './providers/providers.module';
-import { AdzunaSyncProcessor } from './processors/adzuna-sync.processor';
+import { ProviderSyncProcessor } from './processors/provider-sync.processor';
 import { MatchRecentProcessor } from './processors/match-recent.processor';
 import { PrepareApplicationProcessor } from './processors/prepare-application.processor';
 import { SubmissionProcessor } from './processors/submission.processor';
@@ -11,7 +11,7 @@ import { VerificationProcessor } from './processors/verification.processor';
 import { SchedulerService } from './scheduler/scheduler.service';
 
 export const QUEUES = {
-  adzunaSync: 'adzuna-sync',
+  providerSync: 'provider-sync',
   matchRecent: 'match-recent',
   prepareApplication: 'prepare-application',
   submission: 'application-submission',
@@ -28,7 +28,7 @@ export const QUEUES = {
       },
     }),
     BullModule.registerQueue(
-      { name: QUEUES.adzunaSync },
+      { name: QUEUES.providerSync },
       { name: QUEUES.matchRecent },
       { name: QUEUES.prepareApplication },
       { name: QUEUES.submission },
@@ -38,7 +38,7 @@ export const QUEUES = {
     ProvidersModule,
   ],
   providers: [
-    AdzunaSyncProcessor,
+    ProviderSyncProcessor,
     MatchRecentProcessor,
     PrepareApplicationProcessor,
     SubmissionProcessor,

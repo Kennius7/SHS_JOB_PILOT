@@ -1,4 +1,11 @@
 export * from './types';
 export * from './registry';
 export { AdzunaAdapter } from './adapters/adzuna.adapter';
+export { JoobleAdapter } from './adapters/jooble.adapter';
+export { RemotiveAdapter } from './adapters/remotive.adapter';
+export { RemoteOkAdapter } from './adapters/remoteok.adapter';
+export { UsaJobsAdapter } from './adapters/usajobs.adapter';
+export { GreenhouseAdapter } from './adapters/greenhouse.adapter';
+export { LeverAdapter } from './adapters/lever.adapter';
+export { AshbyAdapter } from './adapters/ashby.adapter';
 export { MockSubmissionProvider } from './adapters/mock.adapter';

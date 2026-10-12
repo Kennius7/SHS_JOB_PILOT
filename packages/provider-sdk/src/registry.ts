@@ -1,5 +1,12 @@
 import { JobProvider } from './types';
 import { AdzunaAdapter } from './adapters/adzuna.adapter';
+import { JoobleAdapter } from './adapters/jooble.adapter';
+import { RemotiveAdapter } from './adapters/remotive.adapter';
+import { RemoteOkAdapter } from './adapters/remoteok.adapter';
+import { UsaJobsAdapter } from './adapters/usajobs.adapter';
+import { GreenhouseAdapter } from './adapters/greenhouse.adapter';
+import { LeverAdapter } from './adapters/lever.adapter';
+import { AshbyAdapter } from './adapters/ashby.adapter';
 import { MockSubmissionProvider } from './adapters/mock.adapter';
 
 export interface InitialProviderEntry {
@@ -104,13 +111,23 @@ export interface RegistryEnv {
   adzunaAppId?: string;
   adzunaAppKey?: string;
   adzunaCountry?: string;
+  joobleApiKey?: string;
+  joobleCountry?: string;
+  usajobsApiKey?: string;
+  usajobsEmail?: string;
+  remotiveEnabled?: boolean;
+  remoteokEnabled?: boolean;
+  greenhouseBoard?: string;
+  leverCompany?: string;
+  ashbyOrg?: string;
   mockEnabled?: boolean;
 }
 
 /**
  * Build the registry from environment. Manual-link providers are always
- * registered. Adzuna is registered only if credentials are present.
- * The mock provider is registered in non-production environments.
+ * registered. Providers whose operating mode requires credentials are only
+ * registered when those credentials are present. Public APIs without
+ * credentials are registered unless explicitly disabled.
  */
 export function buildRegistry(env: RegistryEnv, nodeEnv = 'development'): ProviderRegistry {
   const registry = new ProviderRegistry();
@@ -127,6 +144,34 @@ export function buildRegistry(env: RegistryEnv, nodeEnv = 'development'): Provid
         env.adzunaCountry ?? 'ng',
       ),
     );
+  }
+
+  if (env.joobleApiKey) {
+    registry.register(new JoobleAdapter(env.joobleApiKey, env.joobleCountry ?? 'ng'));
+  }
+
+  if (env.usajobsApiKey && env.usajobsEmail) {
+    registry.register(new UsaJobsAdapter(env.usajobsApiKey, env.usajobsEmail));
+  }
+
+  if (env.remotiveEnabled !== false) {
+    registry.register(new RemotiveAdapter());
+  }
+
+  if (env.remoteokEnabled !== false) {
+    registry.register(new RemoteOkAdapter());
+  }
+
+  if (env.greenhouseBoard) {
+    registry.register(new GreenhouseAdapter(env.greenhouseBoard));
+  }
+
+  if (env.leverCompany) {
+    registry.register(new LeverAdapter(env.leverCompany));
+  }
+
+  if (env.ashbyOrg) {
+    registry.register(new AshbyAdapter(env.ashbyOrg));
   }
 
   if (env.mockEnabled || nodeEnv !== 'production') {
