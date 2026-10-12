@@ -10,7 +10,7 @@ export default function HomePage() {
       <header className="mx-auto flex max-w-6xl items-center justify-between p-6">
         <div className="flex items-center gap-2">
           {/* <Briefcase className="h-6 w-6 text-brand-600" /> */}
-          <Image src={logo} alt="SHS Job Pilot Logo" width={20} height={20} className="" />
+          <Image src={logo} alt="SHS Job Pilot Logo" width={40} height={40} className="" />
           <span className="text-lg font-semibold">SHS Job Pilot</span>
         </div>
         <nav className="flex items-center gap-4 text-sm">

@@ -9,6 +9,8 @@ import { z } from 'zod';
 import { Briefcase } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { ApiError } from '@/lib/api';
+import Image from 'next/image';
+import logo from '../../../public/img/SHS_Job_Pilot_Logo1.png';
 
 const schema = z.object({
   email: z.string().email(),
@@ -37,7 +39,8 @@ export default function RegisterPage() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex items-center justify-center gap-2">
-          <Briefcase className="h-6 w-6 text-brand-600" />
+          {/* <Briefcase className="h-6 w-6 text-brand-600" /> */}
+          <Image src={logo} alt="SHS Job Pilot Logo" width={40} height={40} className="" />
           <span className="text-lg font-semibold">SHS Job Pilot</span>
         </div>
         <form onSubmit={handleSubmit(onSubmit)} className="card space-y-4">

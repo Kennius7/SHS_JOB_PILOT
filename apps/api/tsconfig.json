@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "node16",
     "target": "ES2022",
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
     "declaration": false,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -11,7 +11,7 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
+    "rootDir": "./src",
     "incremental": true,
     "skipLibCheck": true,
     "strict": true,

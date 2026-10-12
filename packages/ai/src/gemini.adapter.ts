@@ -1,4 +1,4 @@
-import { GoogleGenAI } from '@google/genai';
+import type { GoogleGenAI } from '@google/genai' with { 'resolution-mode': 'import' };
 import {
   AiAdapter,
   ParsedCv,
@@ -19,16 +19,22 @@ Rules you must never break:
 5. A high match score never overrides a hard eligibility failure (missing mandatory qualification).`;
 
 export class GeminiAdapter implements AiAdapter {
-  private client: GoogleGenAI;
+  private clientPromise: Promise<GoogleGenAI>;
   private model: string;
 
   constructor(apiKey: string, model = 'gemini-3.8-flash') {
-    this.client = new GoogleGenAI({ apiKey });
     this.model = model;
+    this.clientPromise = import('@google/genai').then(
+      (mod) => new mod.GoogleGenAI({ apiKey }),
+    );
+  }
+
+  private get client(): Promise<GoogleGenAI> {
+    return this.clientPromise;
   }
 
   async parseCv(text: string): Promise<ParsedCv> {
-    const res = await this.client.models.generateContent({
+    const res = await (await this.client).models.generateContent({
       model: this.model,
       contents: [
         {
@@ -53,7 +59,7 @@ export class GeminiAdapter implements AiAdapter {
   }
 
   async scoreMatch(input: MatchInput): Promise<MatchScore> {
-    const res = await this.client.models.generateContent({
+    const res = await (await this.client).models.generateContent({
       model: this.model,
       contents: [{ role: 'user', parts: [{ text: this.buildMatchPrompt(input) }] }],
       config: {
@@ -69,7 +75,7 @@ export class GeminiAdapter implements AiAdapter {
   }
 
   async generateCoverLetter(input: CoverLetterInput): Promise<string> {
-    const res = await this.client.models.generateContent({
+    const res = await (await this.client).models.generateContent({
       model: this.model,
       contents: [{ role: 'user', parts: [{ text: this.buildCoverLetterPrompt(input) }] }],
       config: {
