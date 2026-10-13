@@ -96,7 +96,36 @@ export class AdminOpsService {
     };
   }
 
-  async triggerSync(key: string) {
+  async audit({ page, limit, action }: { page: number; limit: number; action?: string }) {
+    const where = action ? { action } : {};
+    const [items, total] = await Promise.all([
+      this.prisma.auditLog.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+        include: { user: { select: { email: true } } },
+      }),
+      this.prisma.auditLog.count({ where }),
+    ]);
+    return {
+      items: items.map((a) => ({
+        id: a.id,
+        email: a.user?.email ?? null,
+        action: a.action,
+        target: a.target,
+        metadata: a.metadata,
+        ip: a.ip,
+        userAgent: a.userAgent,
+        createdAt: a.createdAt,
+      })),
+      total,
+      page,
+      limit,
+    };
+  }
+
+  async triggerSync(key: string, adminId?: string, ip?: string) {
     const provider = await this.prisma.jobProvider.findUnique({ where: { key } });
     if (!provider) throw new BadRequestException(`Provider "${key}" is not registered`);
     const caps = (provider.capabilities ?? {}) as { searchJobs?: boolean };
@@ -108,6 +137,15 @@ export class AdminOpsService {
       { providerKey: key, triggeredBy: 'admin' },
       { jobId: `admin-sync-${Date.now()}`, removeOnComplete: 100, removeOnFail: 200 },
     );
+    await this.prisma.auditLog.create({
+      data: {
+        userId: adminId ?? null,
+        action: 'admin.sync',
+        target: key,
+        metadata: { jobId: job.id },
+        ip,
+      },
+    });
     return { queued: true, jobId: job.id, providerKey: key };
   }
 }

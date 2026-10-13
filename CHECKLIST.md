@@ -45,9 +45,10 @@ Last audit: repository baseline after monorepo scaffold (commit `3c4237a`).
 - [x] Provider registry + capability model + `MANUAL_LINK_ONLY` for LinkedIn/Indeed/Jobberman.
 - [x] Adzuna adapter (search), mock submission provider, provider health rows.
 - [x] Normalization + dedup (`canonicalKey`) + `ProviderSyncRun` accounting.
-- [~] Provider catalogue: only Adzuna + 3 manual links registered of the ~90 listed. **No ATS
-      adapters** (Greenhouse, Lever, Ashby, Workable, …).
-- [ ] Additional Stage 1 API providers (Jooble, USAJOBS, Remotive, Remote OK, …).
+- [x] Stage 1 API providers: Jooble, Remotive, Remote OK, USAJOBS (implemented + registered via env).
+- [x] Stage 2 ATS board readers: Greenhouse, Lever, Ashby (public employer-board APIs, slug-configured).
+- [x] Generic `provider-sync` queue + processor (per-provider repeatable jobs, admin-triggerable for any
+      search-capable provider).
 - [ ] Stage 3 Nigeria/Africa providers beyond Jobberman.
 - [ ] Admin provider activation UI (see Phase 7).
 
@@ -74,8 +75,10 @@ Last audit: repository baseline after monorepo scaffold (commit `3c4237a`).
 
 - [x] User dashboard, jobs browser, approval queue, application tracker/detail, rules builder.
 - [x] Notifications API (`/notifications`) + read/unread UI + header badge.
-- [~] Admin: non-prod test controller + read-only ops API (`/admin/providers|queues|health`,
-      `POST /admin/providers/:key/sync`). Admin dashboard UI still to build.
+- [x] Admin: non-prod test controller + read-only ops API (`/admin/providers|queues|health|audit`,
+      `POST /admin/providers/:key/sync`). Admin dashboard UI (`/admin`, role-gated) shows
+      health cards, queue depth, provider registry with per-provider "Sync now", and a paged
+      audit-log view (action filter); audit records written for logins and admin syncs.
 - [x] Usage & AI cost endpoints (`GET /usage`) + settings UI.
 
 ## Phase 8 — Testing & security
@@ -152,3 +155,53 @@ Verification: `npm run typecheck` ✅ · `npm run build` ✅ · `npm run test` �
 
 Not yet runtime-verified: no PostgreSQL/Redis available in this environment (Docker absent), so
 migrations were not applied and the API/worker were not booted end-to-end.
+
+### Provider breadth slice — Stage 1 APIs + ATS board readers (implemented)
+
+- **New adapters in `@shs/provider-sdk`:** Jooble (credentialed POST API), Remotive (public, paginated),
+  Remote OK (single-request feed, client-side keyword filter), USAJOBS (credentialed, header-based),
+  plus employer job boards Greenhouse / Lever / Ashby (public board APIs, board-slug configured).
+- **Shared normalization helpers** (`adapters/mapping.ts`): `mapEmploymentType`, `inferWorkArrangement`,
+  `parseSalaryRange` — maps free-form strings like "₦400k - ₦600k monthly" to typed fields.
+- **Registry:** `RegistryEnv` extended; credential-gated providers register only when credentials exist,
+  public APIs register unless disabled. `buildRegistry` wires everything from env.
+- **Generic sync:** replaced the adzuna-specific processor with `provider-sync` (queue renamed).
+  The processor reads `job.data.providerKey`, checks availability, ingests via `canonicalKey` dedup,
+  and fans out `match-recent` when new jobs arrive. Scheduler enqueues a repeatable 6-hourly job per
+  search-capable provider; `POST /admin/providers/:key/sync` now works for any registered provider.
+- **Seed:** provider matrix expanded to 11 search/submit rows + 3 manual-link rows, capabilities aligned
+  with adapters, externalized through `.env`.
+- Adapters are fetch-based and pure; verified by `tsc`/build. Runtime calls to live APIs are not
+  exercised here (no credentials, no network guarantees) — they are activated by configuring `.env`.
+
+Verification: `npm run typecheck` ✅ (13/13) · `npm run build` ✅ (8/8) · `npm run test` ✅.
+
+Note: `extras/bootstrap-part4.sh` / `bootstrap-part5.sh` are legacy one-shot scaffolding scripts and
+still describe the old `adzuna-sync` worker; they are not run as part of the build.
+
+### Admin dashboard UI slice (implemented)
+
+- `/admin` page at `apps/web/src/app/(app)/admin/page.tsx`, role-gated client-side to `ADMIN`
+  (redirects non-admins to the dashboard; the API enforces `AdminGuard` server-side).
+- Three sections fed by the existing v1 admin endpoints:
+  - **Health** — per-check cards (database, redis) + provider health summary.
+  - **Job queues** — waiting/active/delayed/completed/failed depth + paused state per queue.
+  - **Provider registry** — access mode, search/submit capabilities, health/error, last sync,
+    and a per-provider **Sync now** button (`POST /v1/admin/providers/:key/sync`), disabled for
+    unconfigured providers; React Query invalidation + inline errors.
+- Sidebar shows an **Admin** link only for `ADMIN` users (`(app)/layout.tsx`).
+
+Verification: web typecheck ✅, `npm run build` ✅ (route compiled). Runtime still requires
+Postgres/Redis to be running to populate health/queue/provider data.
+
+### Audit-log slice (implemented)
+
+- `GET /v1/admin/audit?page&limit&action` on `AdminOpsController` (AdminGuard) →
+  `AdminOpsService.audit()` reads `AuditLog` (desc, includes user email) → `{items,total,page,limit}`.
+- Audit writes: successful logins (`auth.login` with ip/userAgent, fire-and-forget in
+  `AuthService.login`) and admin-triggered provider syncs (`admin.sync` with jobId, admin userId, ip).
+- `/admin` page gains an **Audit log** section: action filter, newest-first table
+  (when/user/action/target/details/IP), paged 25/ps with prev/next.
+
+Verification: `npm run typecheck` ✅ (api + web) · `npm run test` ✅ (22) · `npm run build` ✅ (api + web).
+Phase 2 admin surface (providers, queues, health, audit view) is now complete.

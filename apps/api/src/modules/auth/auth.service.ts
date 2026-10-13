@@ -48,6 +48,19 @@ export class AuthService {
       },
     });
 
+    void this.prisma.auditLog
+      .create({
+        data: {
+          userId: user.id,
+          action: 'auth.login',
+          target: 'user',
+          metadata: { email: user.email },
+          userAgent,
+          ip,
+        },
+      })
+      .catch(() => {});
+
     return {
       accessToken,
       refreshToken,
