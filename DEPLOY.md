@@ -108,6 +108,11 @@ SMTP_PASS=<resend api key>
 ADMIN_EMAIL=<admin email>
 ADMIN_PASSWORD=<admin password>
 
+# Admin console allowlist — comma-separated emails that may reach /admin.
+# Requires the ADMIN role as well. Falls back to a single ADMIN_EMAIL. When
+# empty, the admin console is reachable by nobody (deny-by-default).
+ADMIN_EMAILS=ogbogukenny@yahoo.com
+
 IMAGE_TAG=dev
 ```
 
@@ -277,13 +282,14 @@ Then point `DATABASE_URL` at `localhost:15432` and `REDIS_URL` at
 | `127.0.0.1:3000` not reachable from outside        | Expected — Caddy proxies it; the port is intentionally localhost-only.              |
 | Web calls hit `localhost:3001`                     | `API_INTERNAL_URL` build arg missing; it must be set in the `web` build (§compose). |
 | Login sets no cookie / refresh fails               | `COOKIE_SECURE=true` requires HTTPS; set `false` only for plain HTTP.               |
+| Admin console returns 403 for a real admin         | Email missing from `ADMIN_EMAILS` in `.env` (deny-by-default); recreate the API.    |
 | Emails only reach the account owner                | `onboarding@resend.dev` test sender limitation — verify a sending domain in Resend. |
 | Prisma `libssl` warning                            | Image must install `openssl` (already done in `docker/Dockerfile`).                 |
 
 ## 13. Pre-deploy checklist
 
 - [ ] `git fetch && git reset --hard origin/main` on the VM.
-- [ ] `.env` updated (secrets, URLs, `COOKIE_SECURE`).
+- [ ] `.env` updated (secrets, URLs, `COOKIE_SECURE`, `ADMIN_EMAILS`).
 - [ ] Database backed up before any migration.
 - [ ] `docker compose ... build` succeeded.
 - [ ] `docker compose ... up -d` — all containers healthy.
