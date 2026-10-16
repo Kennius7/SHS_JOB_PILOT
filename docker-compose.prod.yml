@@ -12,7 +12,7 @@ services:
     volumes:
       - job_pilot_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U jobpilot -d jobpilot"]
+      test: ['CMD-SHELL', 'pg_isready -U jobpilot -d jobpilot']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -23,7 +23,16 @@ services:
     image: redis:7-alpine
     container_name: job-pilot-redis
     restart: unless-stopped
-    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "noeviction"]
+    command:
+      [
+        'redis-server',
+        '--appendonly',
+        'yes',
+        '--maxmemory',
+        '256mb',
+        '--maxmemory-policy',
+        'noeviction',
+      ]
     volumes:
       - job_pilot_redisdata:/data
     networks:
@@ -91,11 +100,12 @@ services:
       HOSTNAME: 0.0.0.0
       API_INTERNAL_URL: http://job-pilot-api:3001
     ports:
-      - "3000:3000"
+      - '127.0.0.1:3000:3000'
     depends_on:
       - job-pilot-api
     networks:
       - job-pilot
+      - caddy
 
 volumes:
   job_pilot_pgdata:
@@ -105,3 +115,8 @@ volumes:
 networks:
   job-pilot:
     name: shs-job-pilot-network
+  # Shared ingress network owned by the shs_ai_service project; running Caddy
+  # (shs-caddy) is attached to it, so it can reverse_proxy job-pilot-web by name.
+  caddy:
+    external: true
+    name: shs_ai_service_shs-network

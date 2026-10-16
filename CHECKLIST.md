@@ -94,7 +94,7 @@ Last audit: repository baseline after monorepo scaffold (commit `3c4237a`).
       no-enumeration) and security (cross-tenant isolation, admin authz, malicious upload, dup
       submission idempotency, mass-assignment, no secret leakage, forged JWT).
 - [~] Security tests — cross-tenant isolation, unauthorized admin, malicious uploads, dup submissions,
-      secret leakage covered; **prompt-injection resistance** and AI-timeout behaviour still to add.
+  secret leakage covered; **prompt-injection resistance** and AI-timeout behaviour still to add.
 - [x] Multi-tenant ownership enforcement in `ApplicationsService.get` (spot-checked in integration tests).
 
 ## Phase 9 — Production deployment
@@ -108,7 +108,7 @@ Last audit: repository baseline after monorepo scaffold (commit `3c4237a`).
 - [x] Dockerfile (multi-stage `docker/Dockerfile` with `api`/`worker`/`web` targets) — non-root
       hardening still to add.
 - [~] Oracle VM deployment scripts + reverse proxy integration — VM and its prod stack identified;
-      deployment runbook/scripts still to be written.
+  deployment runbook/scripts still to be written.
 - [ ] Backup/restore + rollback documentation.
 - [ ] Observability: correlation IDs, queue-depth metrics, structured logs.
 
@@ -152,8 +152,8 @@ Fixed blocking defects and built the missing API surface the web app already cal
 - **Added `prisma/seed.ts`** (idempotent, production-guarded): providers, admin + demo users,
   profile, skills, active rule, sample jobs.
 - **New API modules:** Jobs (search/filter/detail/save), Matches, Notifications, Users (`/me` +
-  account deletion), Automation (status/pause/resume), Usage; plus admin ops (providers/queues/health
-  + sync trigger).
+  account deletion), Automation (status/pause/resume), Usage; plus admin ops
+  (providers/queues/health and sync trigger).
 - **Fixed queue DI:** `@nestjs/bullmq` queue tokens are not global, so `@InjectQueue` in sibling
   modules failed at runtime. Each consuming module now registers its own queues.
 - **Fixed pre-existing type errors:** `@shs/ai` `zodToJsonSchema` TS2589; worker

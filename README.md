@@ -142,20 +142,23 @@ override with `SEED_PASSWORD`). It refuses to run when `NODE_ENV=production`.
 
 Root (Turbo-powered):
 
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Run all apps in parallel |
-| `npm run build` | Build all workspaces |
-| `npm run lint` | Lint all workspaces |
-| `npm run typecheck` | Typecheck all workspaces |
-| `npm run test` | Run tests |
-| `npm run test:e2e` | Run e2e tests |
+| Command                                         | Description                                                     |
+| ----------------------------------------------- | --------------------------------------------------------------- |
+| `npm run dev`                                   | Run all apps in parallel                                        |
+| `npm run build`                                 | Build all workspaces                                            |
+| `npm run lint`                                  | Lint all workspaces                                             |
+| `npm run format`                                | Format all files with Prettier                                  |
+| `npm run format:check`                          | Check formatting (used in CI)                                   |
+| `npm run typecheck`                             | Typecheck all workspaces                                        |
+| `npm run test`                                  | Run tests                                                       |
+| `npm run test:e2e`                              | Run e2e tests                                                   |
 | `npm run test:integration --workspace=@shs/api` | Run the API integration/security suite (needs Postgres + Redis) |
-| `npm run prisma:generate` | Generate Prisma client |
-| `npm run prisma:migrate` | Create/apply a dev migration |
-| `npm run prisma:deploy` | Apply migrations (production) |
-| `npm run prisma:studio` | Open Prisma Studio |
-| `npm run db:seed` | Seed the database |
+| `npm run prisma:generate`                       | Generate Prisma client                                          |
+| `npm run prisma:migrate`                        | Create/apply a dev migration                                    |
+| `npm run prisma:deploy`                         | Apply migrations (production)                                   |
+| `npm run prisma:studio`                         | Open Prisma Studio                                              |
+| `npm run db:seed`                               | Seed the database (dev only)                                    |
+| `npm run db:seed:admin`                         | Create/update the admin user (production)                       |
 
 ## Configuration
 
@@ -192,16 +195,19 @@ See `.env.example` for the full list. Key variables:
 
 ## CI/CD & deployment
 
-- **CI** (`.github/workflows/ci.yml`): a `verify` job (install → `prisma
-  generate` → typecheck → unit tests → build) and an `integration` job that
-  spins up Postgres + Redis services and runs the integration suite.
+- **CI** (`.github/workflows/ci.yml`): a `verify` job (install → prisma
+  generate → lint → format check → typecheck → unit tests → build) and an
+  `integration` job that spins up Postgres + Redis services and runs the
+  integration suite.
 - **Publishing** (`.github/workflows/publish.yml`): builds and pushes the
   `api`, `worker`, and `web` images to GHCR on `v*` tags (or manual dispatch,
   tagged `dev`).
 - **Images** (`docker/Dockerfile`): multi-stage with `api` / `worker` / `web`
   targets, driven by a root `turbo run build`.
-- **Production** (`docker-compose.prod.yml`): `web` (published), `api`,
-  `worker`, `postgres`, and `redis` on a private network with healthchecks.
+- **Production** (`docker-compose.prod.yml`): `web`, `api`, `worker`,
+  `postgres`, and `redis` on a private network with healthchecks. The `web`
+  container also joins the shared Caddy ingress network
+  (`shs_ai_service_shs-network`) so Caddy can serve it over HTTPS.
 
 ## Design notes
 
