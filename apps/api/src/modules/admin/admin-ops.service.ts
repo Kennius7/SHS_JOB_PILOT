@@ -66,6 +66,36 @@ export class AdminOpsService {
     return { queues: result };
   }
 
+  async workers() {
+    const queues = await Promise.all(
+      QUEUE_NAMES.map(async (name) => {
+        const queue = this.queueMap[name];
+        const [workers, repeatable, counts, paused] = await Promise.all([
+          queue.getWorkers(),
+          queue.getRepeatableJobs(),
+          queue.getJobCounts('waiting', 'active', 'completed', 'failed', 'delayed'),
+          queue.isPaused(),
+        ]);
+        return {
+          name,
+          paused,
+          counts,
+          workerCount: workers.length,
+          workers,
+          repeatable: repeatable.map((r) => ({
+            key: r.key,
+            name: r.name,
+            pattern: r.pattern ?? null,
+            every: r.every ?? null,
+            next: r.next ?? null,
+            tz: r.tz ?? null,
+          })),
+        };
+      }),
+    );
+    return { queues };
+  }
+
   async health() {
     const checks: Record<string, { ok: boolean; detail?: string }> = {};
 

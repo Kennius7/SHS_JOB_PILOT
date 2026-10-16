@@ -15,3 +15,4 @@ process.env.DOCUMENT_STORAGE_PATH = join(tmpdir(), 'shs-job-pilot-test-uploads')
 process.env.MAX_UPLOAD_SIZE_MB = '10';
 process.env.JWT_ACCESS_TTL = '15m';
 process.env.REFRESH_TOKEN_TTL_DAYS = '30';
+process.env.ADMIN_EMAILS = 'admin@test.dev';

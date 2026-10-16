@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/lib/auth-context';
 import { ApiError } from '@/lib/api';
+import { PasswordInput } from '@/components/password-input';
 import Image from 'next/image';
 import logo from '../../../public/img/SHS_Job_Pilot_Logo1.png';
 
@@ -58,12 +59,10 @@ export default function LoginPage() {
             <label className="label" htmlFor="password">
               Password
             </label>
-            <input
+            <PasswordInput
               id="password"
-              type="password"
               autoComplete="current-password"
               {...register('password')}
-              className="input"
             />
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}

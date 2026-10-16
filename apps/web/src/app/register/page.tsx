@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/lib/auth-context';
 import { ApiError } from '@/lib/api';
+import { PasswordInput } from '@/components/password-input';
 import Image from 'next/image';
 import logo from '../../../public/img/SHS_Job_Pilot_Logo1.png';
 
@@ -57,24 +58,14 @@ export default function RegisterPage() {
           </div>
           <div>
             <label className="label">Password</label>
-            <input
-              type="password"
-              autoComplete="new-password"
-              {...register('password')}
-              className="input"
-            />
+            <PasswordInput autoComplete="new-password" {...register('password')} />
             {formState.errors.password && (
               <p className="mt-1 text-xs text-red-600">{formState.errors.password.message}</p>
             )}
           </div>
           <div>
             <label className="label">Confirm password</label>
-            <input
-              type="password"
-              autoComplete="new-password"
-              {...register('confirm')}
-              className="input"
-            />
+            <PasswordInput autoComplete="new-password" {...register('confirm')} />
             {formState.errors.confirm && (
               <p className="mt-1 text-xs text-red-600">{formState.errors.confirm.message}</p>
             )}

@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { AdminOpsController } from './admin-ops.controller';
 import { AdminOpsService } from './admin-ops.service';
+import { DbExplorerService } from './db-explorer.service';
+import { RedisExplorerService } from './redis-explorer.service';
 
 @Module({
   imports: [
@@ -14,6 +16,6 @@ import { AdminOpsService } from './admin-ops.service';
     ),
   ],
   controllers: [AdminOpsController],
-  providers: [AdminOpsService],
+  providers: [AdminOpsService, DbExplorerService, RedisExplorerService],
 })
 export class AdminOpsModule {}

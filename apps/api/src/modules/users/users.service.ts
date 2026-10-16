@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@shs/data';
+import { isAllowlistedAdmin } from '../auth/admin-allowlist';
 
 @Injectable()
 export class UsersService {
@@ -25,7 +26,7 @@ export class UsersService {
       },
     });
     if (!user) throw new NotFoundException('User not found');
-    return user;
+    return { ...user, isAdmin: isAllowlistedAdmin(user.email, user.role) };
   }
 
   async deleteAccount(userId: string) {

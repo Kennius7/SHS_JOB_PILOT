@@ -49,7 +49,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    if (!loading && !user) router.replace('/login');
+    if (!loading && !user) router.replace('/');
   }, [loading, user, router]);
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
-          {user.role === 'ADMIN' &&
+          {user.isAdmin &&
             ADMIN_NAV.map(({ href, label, icon: Icon }) => {
               const active = pathname === href || pathname?.startsWith(href + '/');
               return (

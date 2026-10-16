@@ -16,6 +16,9 @@ import {
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
+import { DbExplorer } from './db-explorer';
+import { RedisExplorer } from './redis-explorer';
+import { WorkersPanel } from './workers-panel';
 
 interface ProviderCapabilities {
   searchJobs: boolean;
@@ -105,23 +108,23 @@ export default function AdminPage() {
   const { user, loading } = useAuth();
 
   useEffect(() => {
-    if (!loading && user?.role !== 'ADMIN') router.replace('/dashboard');
+    if (!loading && user && !user.isAdmin) router.replace('/dashboard');
   }, [loading, user, router]);
 
   const health = useQuery({
     queryKey: ['admin-health'],
     queryFn: () => api.get<HealthResponse>('/v1/admin/health'),
-    enabled: user?.role === 'ADMIN',
+    enabled: user?.isAdmin === true,
   });
   const queues = useQuery({
     queryKey: ['admin-queues'],
     queryFn: () => api.get<{ queues: QueueInfo[] }>('/v1/admin/queues'),
-    enabled: user?.role === 'ADMIN',
+    enabled: user?.isAdmin === true,
   });
   const providers = useQuery({
     queryKey: ['admin-providers'],
     queryFn: () => api.get<Provider[]>('/v1/admin/providers'),
-    enabled: user?.role === 'ADMIN',
+    enabled: user?.isAdmin === true,
   });
 
   const [auditPage, setAuditPage] = useState(1);
@@ -132,7 +135,7 @@ export default function AdminPage() {
       api.get<AuditResponse>(
         `/v1/admin/audit?page=${auditPage}&limit=25${auditAction ? `&action=${auditAction}` : ''}`,
       ),
-    enabled: user?.role === 'ADMIN',
+    enabled: user?.isAdmin === true,
   });
 
   const invalidateAll = () => {
@@ -147,7 +150,7 @@ export default function AdminPage() {
     onSuccess: invalidateAll,
   });
 
-  if (loading || user?.role !== 'ADMIN') {
+  if (loading || !user?.isAdmin) {
     return <div className="text-sm text-slate-500">Loading…</div>;
   }
 
@@ -251,6 +254,15 @@ export default function AdminPage() {
           </div>
         )}
       </section>
+
+      {/* Workers */}
+      <WorkersPanel />
+
+      {/* Postgres browser */}
+      <DbExplorer />
+
+      {/* Redis browser */}
+      <RedisExplorer />
 
       {/* Providers */}
       <section className="card">

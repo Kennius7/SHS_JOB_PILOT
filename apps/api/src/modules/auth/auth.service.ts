@@ -10,6 +10,7 @@ import * as argon2 from 'argon2';
 import { createHash, randomBytes } from 'crypto';
 import { PrismaService } from '@shs/data';
 import { MailerService } from '../email/email.service';
+import { isAllowlistedAdmin } from './admin-allowlist';
 
 type TokenType = 'EMAIL_VERIFICATION' | 'PASSWORD_RESET';
 
@@ -45,7 +46,7 @@ export class AuthService {
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
     const accessToken = this.jwt.sign(
-      { sub: user.id, role: user.role },
+      { sub: user.id, role: user.role, email: user.email },
       { expiresIn: this.config.get('JWT_ACCESS_TTL', '15m') },
     );
 
@@ -79,7 +80,12 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
-      user: { id: user.id, email: user.email, role: user.role },
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        isAdmin: isAllowlistedAdmin(user.email, user.role),
+      },
     };
   }
 
@@ -112,7 +118,7 @@ export class AuthService {
     });
 
     const accessToken = this.jwt.sign(
-      { sub: session.user.id, role: session.user.role },
+      { sub: session.user.id, role: session.user.role, email: session.user.email },
       { expiresIn: this.config.get('JWT_ACCESS_TTL', '15m') },
     );
 

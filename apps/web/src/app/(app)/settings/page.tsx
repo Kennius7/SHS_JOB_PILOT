@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
 import { Pause, Play, ShieldAlert, Trash2, User, Wallet } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
@@ -36,7 +35,6 @@ interface UsageResponse {
 
 export default function SettingsPage() {
   const qc = useQueryClient();
-  const router = useRouter();
   const { logout } = useAuth();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -62,7 +60,6 @@ export default function SettingsPage() {
     mutationFn: () => api.delete('/v1/users/me'),
     onSuccess: async () => {
       await logout();
-      router.replace('/login');
     },
   });
   const resendVerification = useMutation({

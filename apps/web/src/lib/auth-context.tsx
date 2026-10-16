@@ -8,6 +8,14 @@ export interface AuthUser {
   id: string;
   email: string;
   role: 'USER' | 'ADMIN';
+  isAdmin: boolean;
+}
+
+interface MeResponse {
+  id: string;
+  email: string;
+  role: 'USER' | 'ADMIN';
+  isAdmin: boolean;
 }
 
 interface AuthContextValue {
@@ -34,6 +42,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const res = await api.post<{ accessToken: string }>('/v1/auth/refresh', {});
         setAccessToken(res.accessToken);
+        try {
+          const me = await api.get<MeResponse>('/v1/users/me');
+          const nextUser: AuthUser = {
+            id: me.id,
+            email: me.email,
+            role: me.role,
+            isAdmin: me.isAdmin,
+          };
+          setUser(nextUser);
+          localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(nextUser));
+        } catch {
+          // Keep the cached user if /me cannot be refreshed.
+        }
       } catch {
         // No valid refresh; user stays logged out.
       } finally {
@@ -62,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAccessToken(null);
     setUser(null);
     localStorage.removeItem(USER_STORAGE_KEY);
-    router.push('/login');
+    router.push('/');
   }
 
   return (
