@@ -205,3 +205,17 @@ Postgres/Redis to be running to populate health/queue/provider data.
 
 Verification: `npm run typecheck` ✅ (api + web) · `npm run test` ✅ (22) · `npm run build` ✅ (api + web).
 Phase 2 admin surface (providers, queues, health, audit view) is now complete.
+
+### Dev-run fixes (`npm run dev`)
+
+- **API `Cannot find module dist/main`** — `apps/api/tsconfig.json` had `"incremental": true`, so a
+  stale `tsconfig.build.tsbuildinfo` with missing `dist/` made `nest start --watch` / `nest build`
+  skip emit. Removed `incremental` (and deleted the stray `*.tsbuildinfo`); `nest build` now always
+  emits `dist/main.js`.
+- **Worker `Cannot read properties of undefined (reading 'providerSync')`** — `QUEUES` was exported
+  from `worker.module.ts`, while processors imported it from there; the processor → scheduler →
+  worker.module import cycle left `QUEUES` undefined at decorator eval. Extracted `QUEUES` to
+  `apps/worker/src/queues.ts` (no imports) and repointed `worker.module.ts` + all processors +
+  scheduler at it.
+
+Verification: api/worker typecheck ✅, both `dist/main.js` emitted ✅, worker modules import cleanly ✅.

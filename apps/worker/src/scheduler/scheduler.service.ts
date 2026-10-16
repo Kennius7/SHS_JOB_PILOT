@@ -3,7 +3,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { PrismaService } from '@shs/data';
 import { ProvidersService } from '../providers/providers.service';
-import { QUEUES } from '../worker.module';
+import { QUEUES } from '../queues';
 
 const SYNC_CRON = '0 */6 * * *';
 

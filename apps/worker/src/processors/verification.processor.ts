@@ -3,7 +3,7 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { PrismaService, TransitionsService } from '@shs/data';
 import { ProvidersService } from '../providers/providers.service';
-import { QUEUES } from '../worker.module';
+import { QUEUES } from '../queues';
 
 @Processor(QUEUES.verification, { concurrency: 4 })
 export class VerificationProcessor extends WorkerHost {

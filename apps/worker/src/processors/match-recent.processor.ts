@@ -6,7 +6,7 @@ import {
   evaluateRule, RuleConditionsSchema,
   type EvalContext, type NigerianState, type WorkArrangement, type EmploymentType,
 } from '@shs/rules';
-import { QUEUES } from '../worker.module';
+import { QUEUES } from '../queues';
 
 const BATCH_SIZE = 100;
 const MAX_JOBS_PER_RUN = 500;

@@ -6,7 +6,7 @@ import { PrismaService } from '@shs/data';
 import type { NormalizedJob } from '@shs/provider-sdk';
 import { ProvidersService } from '../providers/providers.service';
 import { SchedulerService } from '../scheduler/scheduler.service';
-import { QUEUES } from '../worker.module';
+import { QUEUES } from '../queues';
 
 const DEFAULT_KEYWORDS = [
   'software engineer', 'data analyst', 'product manager',

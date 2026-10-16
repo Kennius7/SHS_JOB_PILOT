@@ -4,7 +4,7 @@ import { Queue, Job } from 'bullmq';
 import { PrismaService, TransitionsService, ApplicationsService, AiService } from '@shs/data';
 import { ProvidersService } from '../providers/providers.service';
 import { RuleConditionsSchema } from '@shs/rules';
-import { QUEUES } from '../worker.module';
+import { QUEUES } from '../queues';
 
 @Processor(QUEUES.prepareApplication, { concurrency: 4 })
 export class PrepareApplicationProcessor extends WorkerHost {

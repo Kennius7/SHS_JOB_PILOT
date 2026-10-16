@@ -3,7 +3,7 @@ import { Logger } from '@nestjs/common';
 import { Queue, Job } from 'bullmq';
 import { PrismaService, TransitionsService } from '@shs/data';
 import { ProvidersService } from '../providers/providers.service';
-import { QUEUES } from '../worker.module';
+import { QUEUES } from '../queues';
 
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_BACKOFF_MS = [5 * 60_000, 30 * 60_000, 2 * 60 * 60_000];

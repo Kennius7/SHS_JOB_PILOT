@@ -9,14 +9,7 @@ import { PrepareApplicationProcessor } from './processors/prepare-application.pr
 import { SubmissionProcessor } from './processors/submission.processor';
 import { VerificationProcessor } from './processors/verification.processor';
 import { SchedulerService } from './scheduler/scheduler.service';
-
-export const QUEUES = {
-  providerSync: 'provider-sync',
-  matchRecent: 'match-recent',
-  prepareApplication: 'prepare-application',
-  submission: 'application-submission',
-  verification: 'application-verification',
-} as const;
+import { QUEUES } from './queues';
 
 @Module({
   imports: [
