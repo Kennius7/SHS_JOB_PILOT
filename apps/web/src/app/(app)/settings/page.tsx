@@ -62,6 +62,9 @@ export default function SettingsPage() {
       router.replace('/login');
     },
   });
+  const resendVerification = useMutation({
+    mutationFn: () => api.post('/v1/auth/resend-verification'),
+  });
 
   const auto = automation.data;
 
@@ -82,6 +85,31 @@ export default function SettingsPage() {
             <div><dt className="text-slate-500">Name</dt><dd>{me.data?.profile?.fullName ?? '—'}</dd></div>
             <div><dt className="text-slate-500">Email verified</dt><dd>{me.data?.emailVerified ? 'Yes' : 'No'}</dd></div>
           </dl>
+        )}
+        {!me.isLoading && !me.data?.emailVerified && (
+          <div className="mt-4 border-t border-slate-100 pt-4">
+            {resendVerification.isSuccess ? (
+              <p className="text-sm text-green-700">Verification email sent. Check your inbox.</p>
+            ) : (
+              <>
+                <p className="mb-2 text-sm text-amber-600">
+                  Your email is not verified yet.
+                </p>
+                <button
+                  onClick={() => resendVerification.mutate()}
+                  className="btn-secondary"
+                  disabled={resendVerification.isPending}
+                >
+                  {resendVerification.isPending ? 'Sending…' : 'Resend verification email'}
+                </button>
+                {resendVerification.isError && (
+                  <p className="mt-2 text-xs text-red-600">
+                    {(resendVerification.error as Error).message}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
         )}
       </section>
 

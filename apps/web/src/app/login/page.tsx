@@ -53,6 +53,9 @@ export default function LoginPage() {
           <button type="submit" disabled={formState.isSubmitting} className="btn-primary w-full">
             {formState.isSubmitting ? 'Signing in…' : 'Sign in'}
           </button>
+          <p className="text-center text-sm">
+            <Link href="/forgot-password" className="text-brand-600 hover:underline">Forgot password?</Link>
+          </p>
           <p className="text-center text-sm text-slate-600">
             No account? <Link href="/register" className="text-brand-600 hover:underline">Create one</Link>
           </p>

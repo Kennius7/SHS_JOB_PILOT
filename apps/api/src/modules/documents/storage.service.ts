@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createHash, randomUUID } from 'crypto';
 import { promises as fs } from 'fs';
@@ -28,14 +28,14 @@ export class StorageService {
 
   validate(file: Express.Multer.File): void {
     if (file.size > this.maxSizeBytes) {
-      throw new Error(`File exceeds ${this.maxSizeBytes} bytes`);
+      throw new BadRequestException(`File exceeds ${this.maxSizeBytes} bytes`);
     }
     if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
-      throw new Error(`Unsupported MIME type: ${file.mimetype}`);
+      throw new BadRequestException(`Unsupported MIME type: ${file.mimetype}`);
     }
     const ext = extname(file.originalname).toLowerCase();
     if (!ALLOWED_EXTENSIONS.has(ext)) {
-      throw new Error(`Unsupported extension: ${ext}`);
+      throw new BadRequestException(`Unsupported extension: ${ext}`);
     }
   }
 

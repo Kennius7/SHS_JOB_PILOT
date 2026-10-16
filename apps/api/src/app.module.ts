@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { DataModule } from '@shs/data';
 import { AuthModule } from './modules/auth/auth.module';
+import { EmailModule } from './modules/email/email.module';
 import { ProfileModule } from './modules/profile/profile.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { RulesModule } from './modules/rules/rules.module';
@@ -29,6 +30,7 @@ const isProd = process.env.NODE_ENV === 'production';
       },
     }),
     DataModule,
+    EmailModule,
     AuthModule,
     ProfileModule,
     DocumentsModule,

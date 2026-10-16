@@ -1,0 +1,107 @@
+name: shs-job-pilot
+
+services:
+  job-pilot-db:
+    image: postgres:16-alpine
+    container_name: job-pilot-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: jobpilot
+      POSTGRES_USER: jobpilot
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    volumes:
+      - job_pilot_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jobpilot -d jobpilot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - job-pilot
+
+  job-pilot-redis:
+    image: redis:7-alpine
+    container_name: job-pilot-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - job_pilot_redisdata:/data
+    networks:
+      - job-pilot
+
+  job-pilot-api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: api
+    image: ghcr.io/kennius7/shs_job_pilot/api:${IMAGE_TAG:-latest}
+    container_name: job-pilot-api
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://jobpilot:${DB_PASSWORD}@job-pilot-db:5432/jobpilot
+      REDIS_URL: redis://job-pilot-redis:6379
+      DOCUMENT_STORAGE_PATH: /app/storage/documents
+    volumes:
+      - job_pilot_documents:/app/storage/documents
+    depends_on:
+      job-pilot-db:
+        condition: service_healthy
+      job-pilot-redis:
+        condition: service_started
+    networks:
+      - job-pilot
+
+  job-pilot-worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: worker
+    image: ghcr.io/kennius7/shs_job_pilot/worker:${IMAGE_TAG:-latest}
+    container_name: job-pilot-worker
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://jobpilot:${DB_PASSWORD}@job-pilot-db:5432/jobpilot
+      REDIS_URL: redis://job-pilot-redis:6379
+    depends_on:
+      job-pilot-db:
+        condition: service_healthy
+      job-pilot-redis:
+        condition: service_started
+    networks:
+      - job-pilot
+
+  job-pilot-web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: web
+      args:
+        API_INTERNAL_URL: http://job-pilot-api:3001
+    image: ghcr.io/kennius7/shs_job_pilot/web:${IMAGE_TAG:-latest}
+    container_name: job-pilot-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      API_INTERNAL_URL: http://job-pilot-api:3001
+    ports:
+      - "3000:3000"
+    depends_on:
+      - job-pilot-api
+    networks:
+      - job-pilot
+
+volumes:
+  job_pilot_pgdata:
+  job_pilot_redisdata:
+  job_pilot_documents:
+
+networks:
+  job-pilot:
+    name: shs-job-pilot-network

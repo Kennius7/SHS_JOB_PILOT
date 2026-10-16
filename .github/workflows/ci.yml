@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Typecheck · Unit tests · Build
+    runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: ci-only-not-a-real-secret-0000000000000000000000
+      SESSION_SECRET: ci-only-not-a-real-secret-0000000000000000000000
+      AI_MOCK_MODE: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Generate Prisma client
+        run: npx prisma generate --schema=prisma/schema.prisma
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm run test
+      - name: Build
+        run: npm run build
+
+  integration:
+    name: Integration & security tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: shs
+          POSTGRES_PASSWORD: shs
+          POSTGRES_DB: shs_job_pilot_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U shs -d shs_job_pilot_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://shs:shs@localhost:5432/shs_job_pilot_test?schema=public
+      TEST_DATABASE_URL: postgresql://shs:shs@localhost:5432/shs_job_pilot_test?schema=public
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-only-not-a-real-secret-0000000000000000000000
+      SESSION_SECRET: ci-only-not-a-real-secret-0000000000000000000000
+      AI_MOCK_MODE: "true"
+      DOCUMENT_STORAGE_PATH: ./.data/test-documents
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Generate Prisma client
+        run: npx prisma generate --schema=prisma/schema.prisma
+      - name: Build workspace dependencies
+        run: npx turbo run build --filter=@shs/api...
+      - name: Apply migrations to test database
+        run: npx prisma migrate deploy --schema=prisma/schema.prisma
+      - name: Integration & security tests
+        run: npm run test:integration --workspace=@shs/api

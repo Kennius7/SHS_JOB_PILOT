@@ -1,9 +1,20 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as argon2 from 'argon2';
 import { createHash, randomBytes } from 'crypto';
 import { PrismaService } from '@shs/data';
+import { MailerService } from '../email/email.service';
+
+type TokenType = 'EMAIL_VERIFICATION' | 'PASSWORD_RESET';
+
+const VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
+const RESET_TTL_MS = 60 * 60 * 1000;
 
 @Injectable()
 export class AuthService {
@@ -11,16 +22,20 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
+    private mailer: MailerService,
   ) {}
 
   async register(email: string, password: string) {
     const existing = await this.prisma.user.findUnique({ where: { email } });
     if (existing) throw new ConflictException('Email already registered');
     const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
-    return this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: { email, passwordHash },
       select: { id: true, email: true, role: true, createdAt: true },
     });
+    const token = await this.issueToken(user.id, 'EMAIL_VERIFICATION', VERIFICATION_TTL_MS);
+    await this.mailer.sendVerification(user.email, token);
+    return user;
   }
 
   async login(email: string, password: string, userAgent?: string, ip?: string) {
@@ -110,5 +125,81 @@ export class AuthService {
       where: { refreshHash, revokedAt: null },
       data: { revokedAt: new Date() },
     });
+  }
+
+  async verifyEmail(rawToken: string) {
+    const token = await this.consumeToken(rawToken, 'EMAIL_VERIFICATION');
+    if (token.user.emailVerified) return { verified: true };
+    await this.prisma.user.update({
+      where: { id: token.userId },
+      data: { emailVerified: new Date() },
+    });
+    return { verified: true };
+  }
+
+  async resendVerification(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || user.deletedAt) throw new UnauthorizedException();
+    if (user.emailVerified) throw new BadRequestException('Email already verified');
+    const token = await this.issueToken(userId, 'EMAIL_VERIFICATION', VERIFICATION_TTL_MS);
+    await this.mailer.sendVerification(user.email, token);
+    return { sent: true };
+  }
+
+  async requestPasswordReset(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (user && !user.deletedAt) {
+      const token = await this.issueToken(user.id, 'PASSWORD_RESET', RESET_TTL_MS);
+      await this.mailer.sendPasswordReset(user.email, token);
+    }
+    return { sent: true };
+  }
+
+  async resetPassword(rawToken: string, password: string) {
+    const token = await this.consumeToken(rawToken, 'PASSWORD_RESET');
+    const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: token.userId },
+        data: { passwordHash },
+      }),
+      this.prisma.userSession.updateMany({
+        where: { userId: token.userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+    ]);
+    return { reset: true };
+  }
+
+  private hashToken(raw: string): string {
+    return createHash('sha256').update(raw).digest('hex');
+  }
+
+  private async issueToken(userId: string, type: TokenType, ttlMs: number): Promise<string> {
+    const raw = randomBytes(32).toString('base64url');
+    await this.prisma.verificationToken.create({
+      data: {
+        userId,
+        type,
+        tokenHash: this.hashToken(raw),
+        expiresAt: new Date(Date.now() + ttlMs),
+      },
+    });
+    return raw;
+  }
+
+  private async consumeToken(raw: string, type: TokenType) {
+    const token = await this.prisma.verificationToken.findUnique({
+      where: { tokenHash: this.hashToken(raw) },
+      include: { user: true },
+    });
+    if (!token || token.type !== type || token.usedAt || token.expiresAt < new Date()) {
+      throw new BadRequestException('Invalid or expired token');
+    }
+    await this.prisma.verificationToken.update({
+      where: { id: token.id },
+      data: { usedAt: new Date() },
+    });
+    return token;
   }
 }

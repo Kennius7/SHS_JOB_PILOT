@@ -11,8 +11,9 @@ Last audit: repository baseline after monorepo scaffold (commit `3c4237a`).
 
 - [x] Inspected repository structure, packages, apps, Prisma schema, dev Docker Compose.
 - [x] Confirmed build/test tooling (`turbo`, `tsc`, `vitest` in `@shs/rules`, `jest` configured in `apps/api`).
-- [~] Oracle Cloud VM / reverse proxy / live deployment: **not inspected** (no access from this
-      environment). Prerequisite: SSH/deployment access + existing infra details.
+- [x] Oracle Cloud VM: reachable via SSH alias `shs-trade-forge` (Ubuntu; runs the `shs-job-pilot`
+      prod stack in Docker). DB/Redis reachable locally through an SSH tunnel. Reverse proxy / public
+      routing still to be documented.
 - [x] Produced gap analysis and prioritized plan (see below).
 
 ## Phase 2 — Foundation
@@ -37,8 +38,8 @@ Last audit: repository baseline after monorepo scaffold (commit `3c4237a`).
 - [~] OCR for scanned PDFs — detected (`NEEDS_OCR`) but no OCR backend.
 - [ ] Multiple CV versions surfaced distinctly in UI (model supports it; UI lists documents).
 - [ ] Malware scanning of uploads.
-- [ ] Password reset.
-- [ ] Email verification (requires email provider — not configured).
+- [x] Password reset (emailed single-use token; rotates password and revokes all sessions).
+- [x] Email verification (token email on register, verify + resend endpoints, `emailVerified` shown in settings).
 
 ## Phase 4 — Provider integrations
 
@@ -86,19 +87,28 @@ Last audit: repository baseline after monorepo scaffold (commit `3c4237a`).
 - [x] Unit tests: `@shs/rules` engine.
 - [x] Unit tests: `@shs/api` Jobs / Notifications / Automation services (Jest + ts-jest).
 - [x] e2e smoke script (`scripts/e2e-smoke.sh`) — ad hoc, not wired to a runner.
-- [ ] API/worker unit tests.
-- [ ] Integration tests (Prisma, Redis/BullMQ, provider errors, auth, uploads, AI timeouts).
-- [ ] Security tests (cross-tenant isolation, unauthorized admin, malicious uploads, dup submissions,
-      prompt-injection resistance, secret leakage).
-- [x] Multi-tenant ownership enforcement in `ApplicationsService.get` (spot-checked).
+- [ ] API/worker unit tests (services covered; controllers/processors not).
+- [x] Integration tests — dedicated `apps/api/test` Jest harness runs the real Nest app against
+      Postgres+Redis (`test:integration`, `migrations deploy` in global setup, table truncation
+      between tests): auth/email flows (register→verify→resend, forgot→reset→session revocation,
+      no-enumeration) and security (cross-tenant isolation, admin authz, malicious upload, dup
+      submission idempotency, mass-assignment, no secret leakage, forged JWT).
+- [~] Security tests — cross-tenant isolation, unauthorized admin, malicious uploads, dup submissions,
+      secret leakage covered; **prompt-injection resistance** and AI-timeout behaviour still to add.
+- [x] Multi-tenant ownership enforcement in `ApplicationsService.get` (spot-checked in integration tests).
 
 ## Phase 9 — Production deployment
 
-- [ ] `.github/workflows` (none).
-- [ ] GHCR image publishing.
-- [ ] Production `docker-compose` with web+api+worker+postgres+redis, private network, healthchecks.
-- [ ] Dockerfiles (multi-stage, non-root) for web/api/worker.
-- [ ] Oracle VM deployment scripts + reverse proxy integration.
+- [x] `.github/workflows` — `ci.yml` (typecheck · unit tests · build; and an integration job with
+      Postgres+Redis services) and `publish.yml` (multi-arch image build/push to GHCR on `v*` tags or
+      manual dispatch → `dev` tag).
+- [x] GHCR image publishing (matrix: `api`, `worker`, `web` → `ghcr.io/<owner>/<repo>/<target>`).
+- [x] Production `docker-compose` (`docker-compose.prod.yml`) with web+api+worker+postgres+redis,
+      private network, healthchecks.
+- [x] Dockerfile (multi-stage `docker/Dockerfile` with `api`/`worker`/`web` targets) — non-root
+      hardening still to add.
+- [~] Oracle VM deployment scripts + reverse proxy integration — VM and its prod stack identified;
+      deployment runbook/scripts still to be written.
 - [ ] Backup/restore + rollback documentation.
 - [ ] Observability: correlation IDs, queue-depth metrics, structured logs.
 
@@ -123,7 +133,9 @@ Last audit: repository baseline after monorepo scaffold (commit `3c4237a`).
 - No Oracle VM access — infrastructure items marked `[!]` require credentials/details.
 - No provider credentials for most catalogue entries — adapters implemented as interfaces +
   configuration, documented as inactive until configured.
-- Email delivery not configured — verification/reset deferred behind provider config.
+- Email is wired with pluggable transports (`console` for dev, `smtp` for production via
+  `EMAIL_PROVIDER`); no transactional provider is configured in this environment, so production
+  delivery still needs SMTP credentials.
 
 ---
 
@@ -219,3 +231,54 @@ Phase 2 admin surface (providers, queues, health, audit view) is now complete.
   scheduler at it.
 
 Verification: api/worker typecheck ✅, both `dist/main.js` emitted ✅, worker modules import cleanly ✅.
+
+### CI/CD slice (implemented)
+
+- **`docker/Dockerfile`** — multi-stage with `builder` + `api`/`worker`/`web` targets; runs
+  `npm ci`, `prisma generate`, and a root `turbo run build` so the whole workspace is compiled.
+- **`docker-compose.prod.yml`** — `web` (published), `api`, `worker`, `postgres`, `redis` on a private
+  network with healthchecks; images pull from GHCR (`${IMAGE_TAG:-latest}`).
+- **`.github/workflows/ci.yml`** — `verify` job (npm ci → prisma generate → typecheck → unit tests →
+  build) and `integration` job (Postgres 16 + Redis 7 services, migrations deployed, integration suite).
+- **`.github/workflows/publish.yml`** — matrix build/push of the three images to GHCR on `v*` tags or
+  manual dispatch (`dev` tag), using Buildx + GHA layer cache.
+
+Verification: workflow YAML compiles in-repo; images are not built locally (no Docker) — validated via
+`npm run typecheck`/`build` and the `test:integration` job contents.
+
+### Integration & security test slice (implemented)
+
+- **`packages/email` (`@shs/email`)** — first-class email package: `console` / `memory` / `smtp` /
+  `none` transports behind a small `EmailSender` interface + `createEmailSender()` factory.
+- **API email module** (`apps/api/src/modules/email`) — global `EmailModule` provides the transport via
+  `EMAIL_SENDER` token; `MailerService` composes verification/reset emails from `WEB_URL`.
+- **`apps/api/src/bootstrap.ts`** — extracted `configureApp()` (helmet, cookies, CORS, global prefix,
+  URI versioning, validation pipe) shared by `main.ts` and the integration test app.
+- **Integration harness** (`apps/api/test`) — `jest-integration.config.js` + `setup-env.ts` (derives a
+  `*_test` DB and Redis DB 1 from `.env`, switching mail to the memory transport) + `global-setup.ts`
+  (`prisma migrate deploy`) + `helpers.ts` (build app, truncate tables, register/login, parse tokens
+  from captured emails). Run with `npm run test:integration --workspace=@shs/api`.
+- **14 integration/security tests**: registration verification email + no password-hash leakage;
+  verify + reuse rejection + tampered token; resend auth/guard; forgot→reset→session revocation and
+  no account enumeration; mass-assignment rejection; forged JWT; non-admin 403 on admin routes;
+  cross-tenant application/document isolation; disallowed upload types; duplicate-submission idempotency.
+- **Fixes found by the suite:** `StorageService.validate` now throws `BadRequestException` (was a raw
+  `Error` → 500); admin sync audit now passes `req.user.userId`; stripped a UTF-8 BOM from the init
+  migration that broke `prisma migrate deploy`.
+
+Verification: `npm run test:integration --workspace=@shs/api` ✅ (14/14, against a real Postgres+Redis).
+
+### Email verification & password reset slice (implemented)
+
+- **Schema:** `VerificationTokenType` enum + `VerificationToken` model (hashed single-use tokens with
+  expiry), added via migration `20260102000000_add_verification_tokens` (generated with
+  `prisma migrate diff`, no live DB).
+- **API:** `POST /auth/verify-email`, `POST /auth/resend-verification` (JWT), `POST /auth/forgot-password`,
+  `POST /auth/reset-password`; registration now issues a verification email; reset revokes all sessions.
+  Tokens are stored as SHA-256 hashes; responses never reveal whether an account exists.
+- **Web:** new public pages `/verify-email`, `/forgot-password`, `/reset-password`; login gains a
+  "Forgot password?" link; settings shows verified state + a "Resend verification email" action.
+- **Config:** `EMAIL_PROVIDER` / `EMAIL_FROM` / `SMTP_*` documented in `.env.example`.
+
+Verification: `npm run typecheck` ✅ (15/15) · `npm run build` ✅ (9/9) · `npm run test` ✅ (22) ·
+integration suite ✅ (14).

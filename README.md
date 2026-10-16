@@ -30,8 +30,9 @@ packages/
   shared/        Application lifecycle state machine (14 states)
   rules/         Deterministic eligibility engine (Zod schemas)
   ai/            Gemini adapter + USD budget guardrails
+  email/         Pluggable email transports (console/memory/smtp/none)
   provider-sdk/  Job-source contracts + Adzuna/Jooble/Remotive/RemoteOK/USAJOBS +
-                Greenhouse/Lever/Ashby board adapters
+                 Greenhouse/Lever/Ashby board adapters
   data/          Prisma + NestJS services (persistence/orchestration)
 prisma/schema.prisma   Full data model
 ```
@@ -58,7 +59,8 @@ prisma/schema.prisma   Full data model
 ### `apps/api`
 
 REST API. JWT auth (in-memory access token, HttpOnly refresh cookie, Argon2id
-hashing), profile/onboarding CRUD, document upload with CV text extraction
+hashing) with email verification and password reset (single-use hashed tokens),
+profile/onboarding CRUD, document upload with CV text extraction
 (`pdf-parse` / `mammoth`) and AI parsing, application-rule CRUD plus simulation,
 and application approve/skip/verify. Swagger at `/api/docs`. Non-production-only
 admin test endpoints back the e2e smoke script.
@@ -82,7 +84,8 @@ Authenticated UI with client-side route guards:
   preferences → rules → done)
 
 `settings` (account, automation controls, AI usage) and `notifications` (inbox +
-unread badge) render real API data.
+unread badge) render real API data. Public auth pages cover the email flows:
+`/verify-email`, `/forgot-password`, and `/reset-password`.
 
 ## Packages
 
@@ -94,6 +97,9 @@ unread badge) render real API data.
 - **`@shs/ai`** — provider-agnostic AI abstraction over Gemini with strict
   Zod structured output, prompt-injection hardening, and per-user/platform USD
   budget caps. Mocks when no key is configured.
+- **`@shs/email`** — small `EmailSender` interface with `console` (dev),
+  `memory` (tests), `smtp` (nodemailer), and `none` transports, selected via
+  `EMAIL_PROVIDER`. Used by the API to send verification and reset emails.
 - **`@shs/provider-sdk`** — zero-dependency contracts for job providers
   (search, details, submission, verification). Ships adapters for Adzuna,
   Jooble, Remotive, Remote OK, and USAJOBS plus Greenhouse / Lever / Ashby
@@ -120,6 +126,7 @@ and Postgres full-text search.
 cp .env.example .env
 # Edit .env — set JWT_SECRET and SESSION_SECRET to random 48-byte strings.
 # Leave AI_API_KEY blank to run in mock mode.
+# Email defaults to EMAIL_PROVIDER=console (prints messages to the API log).
 
 npm install
 docker compose up -d
@@ -143,6 +150,7 @@ Root (Turbo-powered):
 | `npm run typecheck` | Typecheck all workspaces |
 | `npm run test` | Run tests |
 | `npm run test:e2e` | Run e2e tests |
+| `npm run test:integration --workspace=@shs/api` | Run the API integration/security suite (needs Postgres + Redis) |
 | `npm run prisma:generate` | Generate Prisma client |
 | `npm run prisma:migrate` | Create/apply a dev migration |
 | `npm run prisma:deploy` | Apply migrations (production) |
@@ -161,9 +169,38 @@ See `.env.example` for the full list. Key variables:
 - **AI:** `AI_PROVIDER`, `AI_API_KEY`, `AI_MODEL`, `AI_MOCK_MODE`,
   `AI_MONTHLY_BUDGET_USD`, `AI_PER_USER_MONTHLY_BUDGET_USD`
 - **Documents:** `DOCUMENT_STORAGE_PATH`, `MAX_UPLOAD_SIZE_MB`
+- **Email:** `EMAIL_PROVIDER` (`console` | `memory` | `smtp` | `none`),
+  `EMAIL_FROM`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`
 - **CORS:** `CORS_ORIGINS`
 - **Providers:** `PROVIDER_ADZUNA_ENABLED`, `PROVIDER_ADZUNA_APP_ID`,
   `PROVIDER_ADZUNA_APP_KEY`, `PROVIDER_ADZUNA_COUNTRY`
+
+## Testing
+
+- **Unit** (`npm run test`): `@shs/rules` engine (vitest) and the `@shs/api`
+  Jobs / Notifications / Automation services (Jest + ts-jest).
+- **Integration & security** (`npm run test:integration --workspace=@shs/api`):
+  a dedicated Nest test app (`apps/api/test`) runs against a real Postgres +
+  Redis. It points at a `*_test` database and Redis DB 1 (derived from `.env`,
+  or set `TEST_DATABASE_URL` / `TEST_REDIS_URL`), applies migrations, and
+  truncates tables between tests. Covers the auth/email flows (register →
+  verify → resend, forgot → reset → session revocation, no account
+  enumeration) and security (cross-tenant isolation, admin authorization,
+  malicious uploads, duplicate-submission idempotency, mass-assignment,
+  forged tokens, and secret leakage).
+
+## CI/CD & deployment
+
+- **CI** (`.github/workflows/ci.yml`): a `verify` job (install → `prisma
+  generate` → typecheck → unit tests → build) and an `integration` job that
+  spins up Postgres + Redis services and runs the integration suite.
+- **Publishing** (`.github/workflows/publish.yml`): builds and pushes the
+  `api`, `worker`, and `web` images to GHCR on `v*` tags (or manual dispatch,
+  tagged `dev`).
+- **Images** (`docker/Dockerfile`): multi-stage with `api` / `worker` / `web`
+  targets, driven by a root `turbo run build`.
+- **Production** (`docker-compose.prod.yml`): `web` (published), `api`,
+  `worker`, `postgres`, and `redis` on a private network with healthchecks.
 
 ## Design notes
 

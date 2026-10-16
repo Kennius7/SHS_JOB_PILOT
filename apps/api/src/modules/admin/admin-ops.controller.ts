@@ -41,6 +41,6 @@ export class AdminOpsController {
   @Post('providers/:key/sync')
   triggerSync(@Req() req: Request, @Param('key') key: string) {
     const u = (req as any).user;
-    return this.admin.triggerSync(key, u?.id, req.ip);
+    return this.admin.triggerSync(key, u?.userId, req.ip);
   }
 }

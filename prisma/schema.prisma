@@ -140,6 +140,11 @@ enum AttemptOutcome {
   UNKNOWN
 }
 
+enum VerificationTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
 // ============================================================
 // USER & AUTH
 // ============================================================
@@ -155,18 +160,34 @@ model User {
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
 
-  profile       UserProfile?
-  sessions      UserSession[]
-  documents     Document[]
-  applications  Application[]
-  savedJobs     SavedJob[]
-  rules         ApplicationRule[]
-  notifications Notification[]
-  auditLogs     AuditLog[]
-  usageRecords  UsageRecord[]
+  profile            UserProfile?
+  sessions           UserSession[]
+  documents          Document[]
+  applications       Application[]
+  savedJobs          SavedJob[]
+  rules              ApplicationRule[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+  usageRecords       UsageRecord[]
+  verificationTokens VerificationToken[]
 
   @@index([email])
   @@index([deletedAt])
+}
+
+model VerificationToken {
+  id        String                @id @default(cuid())
+  userId    String
+  type      VerificationTokenType
+  tokenHash String                @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime              @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([expiresAt])
 }
 
 model UserSession {
