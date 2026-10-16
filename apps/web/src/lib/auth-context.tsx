@@ -4,7 +4,11 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, setAccessToken } from './api';
 
-export interface AuthUser { id: string; email: string; role: 'USER' | 'ADMIN' }
+export interface AuthUser {
+  id: string;
+  email: string;
+  role: 'USER' | 'ADMIN';
+}
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -39,9 +43,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   async function login(email: string, password: string) {
-    const res = await api.post<{ accessToken: string; user: AuthUser }>(
-      '/v1/auth/login', { email, password },
-    );
+    const res = await api.post<{ accessToken: string; user: AuthUser }>('/v1/auth/login', {
+      email,
+      password,
+    });
     setAccessToken(res.accessToken);
     setUser(res.user);
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(res.user));

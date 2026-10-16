@@ -1,6 +1,4 @@
-import {
-  Controller, Post, Body, Req, UseGuards, ForbiddenException, NotFoundException,
-} from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiExcludeController } from '@nestjs/swagger';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';

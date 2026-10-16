@@ -1,5 +1,8 @@
 import {
-  Injectable, NotFoundException, ForbiddenException, BadRequestException,
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService, AiService } from '@shs/data';
 import { StorageService } from './storage.service';
@@ -86,8 +89,13 @@ export class DocumentsService {
       where: { userId, deletedAt: null },
       orderBy: { createdAt: 'desc' },
       select: {
-        id: true, kind: true, originalName: true, mimeType: true,
-        sizeBytes: true, extractionStatus: true, createdAt: true,
+        id: true,
+        kind: true,
+        originalName: true,
+        mimeType: true,
+        sizeBytes: true,
+        extractionStatus: true,
+        createdAt: true,
         parsedData: true,
       },
     });

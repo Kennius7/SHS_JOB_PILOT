@@ -25,7 +25,8 @@ export default function ApplicationDetailPage() {
   const { data: app, isLoading } = useQuery({
     queryKey: ['application', params.id],
     queryFn: () => api.get<any>(`/v1/applications/${params.id}`),
-    refetchInterval: (q) => (['SUBMITTING', 'QUEUED', 'SUBMITTED'].includes(q.state.data?.state) ? 5000 : false),
+    refetchInterval: (q) =>
+      ['SUBMITTING', 'QUEUED', 'SUBMITTED'].includes(q.state.data?.state) ? 5000 : false,
   });
 
   const approve = useMutation({
@@ -52,7 +53,9 @@ export default function ApplicationDetailPage() {
                 {app.state.replace(/_/g, ' ')}
               </span>
               {app.matchScore != null && (
-                <span className="rounded bg-slate-100 px-2 py-0.5 text-xs">Match {Math.round(app.matchScore)}</span>
+                <span className="rounded bg-slate-100 px-2 py-0.5 text-xs">
+                  Match {Math.round(app.matchScore)}
+                </span>
               )}
               <span className="text-xs text-slate-500">via {app.job.providerKey}</span>
             </div>
@@ -60,16 +63,29 @@ export default function ApplicationDetailPage() {
           <div className="flex gap-2">
             {app.state === 'AWAITING_APPROVAL' && (
               <>
-                <button onClick={() => approve.mutate()} disabled={approve.isPending} className="btn-primary">
+                <button
+                  onClick={() => approve.mutate()}
+                  disabled={approve.isPending}
+                  className="btn-primary"
+                >
                   <CheckCircle2 className="h-4 w-4" /> Approve & queue
                 </button>
-                <button onClick={() => skip.mutate()} disabled={skip.isPending} className="btn-secondary">
+                <button
+                  onClick={() => skip.mutate()}
+                  disabled={skip.isPending}
+                  className="btn-secondary"
+                >
                   <Ban className="h-4 w-4" /> Skip
                 </button>
               </>
             )}
             {app.state === 'MANUAL_APPLICATION_REQUIRED' && app.job.applyUrl && (
-              <a href={app.job.applyUrl} target="_blank" rel="noopener noreferrer" className="btn-primary">
+              <a
+                href={app.job.applyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary"
+              >
                 <ExternalLink className="h-4 w-4" /> Apply on site
               </a>
             )}
@@ -96,7 +112,9 @@ export default function ApplicationDetailPage() {
                     <span className="font-medium">{e.toState}</span>
                   </div>
                   {e.note && <div className="text-xs text-slate-500">{e.note}</div>}
-                  <div className="text-xs text-slate-400">{new Date(e.createdAt).toLocaleString()}</div>
+                  <div className="text-xs text-slate-400">
+                    {new Date(e.createdAt).toLocaleString()}
+                  </div>
                 </div>
               </li>
             ))}
@@ -115,8 +133,14 @@ export default function ApplicationDetailPage() {
                     <span className="font-medium">Attempt {a.attemptNumber}</span>
                     <span className="text-xs text-slate-500">{a.outcome}</span>
                   </div>
-                  {a.errorMessage && <div className="mt-1 text-xs text-red-600">{a.errorMessage}</div>}
-                  {a.providerRefId && <div className="mt-1 font-mono text-xs text-slate-500">ref: {a.providerRefId}</div>}
+                  {a.errorMessage && (
+                    <div className="mt-1 text-xs text-red-600">{a.errorMessage}</div>
+                  )}
+                  {a.providerRefId && (
+                    <div className="mt-1 font-mono text-xs text-slate-500">
+                      ref: {a.providerRefId}
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

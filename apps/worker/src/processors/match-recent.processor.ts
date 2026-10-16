@@ -3,8 +3,12 @@ import { Logger } from '@nestjs/common';
 import { Queue, Job } from 'bullmq';
 import { PrismaService, ApplicationsService, TransitionsService } from '@shs/data';
 import {
-  evaluateRule, RuleConditionsSchema,
-  type EvalContext, type NigerianState, type WorkArrangement, type EmploymentType,
+  evaluateRule,
+  RuleConditionsSchema,
+  type EvalContext,
+  type NigerianState,
+  type WorkArrangement,
+  type EmploymentType,
 } from '@shs/rules';
 import { QUEUES } from '../queues';
 
@@ -20,7 +24,9 @@ export class MatchRecentProcessor extends WorkerHost {
     private applications: ApplicationsService,
     private transitions: TransitionsService,
     @InjectQueue(QUEUES.prepareApplication) private prepareQueue: Queue,
-  ) { super(); }
+  ) {
+    super();
+  }
 
   async process(job: Job<{ userId: string; since?: string }>) {
     const { userId, since } = job.data;
@@ -59,7 +65,11 @@ export class MatchRecentProcessor extends WorkerHost {
     const seen = new Set(alreadyEvaluated.map((e) => e.jobId));
 
     let cursor: string | undefined;
-    let examined = 0, eligible = 0, review = 0, ineligible = 0, created = 0;
+    let examined = 0,
+      eligible = 0,
+      review = 0,
+      ineligible = 0,
+      created = 0;
 
     while (examined < MAX_JOBS_PER_RUN) {
       const jobs = await this.prisma.job.findMany({
@@ -76,12 +86,20 @@ export class MatchRecentProcessor extends WorkerHost {
         examined++;
         const ctx: EvalContext = {
           job: {
-            title: j.title, description: j.description, employer: j.employer,
-            state: j.state, workArrangement: j.workArrangement as WorkArrangement,
+            title: j.title,
+            description: j.description,
+            employer: j.employer,
+            state: j.state,
+            workArrangement: j.workArrangement as WorkArrangement,
             employmentType: j.employmentType as EmploymentType,
-            salaryMin: j.salaryMin, salaryMax: j.salaryMax, salaryCurrency: j.salaryCurrency,
-            requiredSkills: j.requiredSkills, preferredSkills: j.preferredSkills,
-            experienceYears: j.experienceYears, seniority: j.seniority, publishedAt: j.publishedAt,
+            salaryMin: j.salaryMin,
+            salaryMax: j.salaryMax,
+            salaryCurrency: j.salaryCurrency,
+            requiredSkills: j.requiredSkills,
+            preferredSkills: j.preferredSkills,
+            experienceYears: j.experienceYears,
+            seniority: j.seniority,
+            publishedAt: j.publishedAt,
           },
           profile: profileCtx,
           now: new Date(),
@@ -90,22 +108,36 @@ export class MatchRecentProcessor extends WorkerHost {
 
         await this.prisma.ruleEvaluation.create({
           data: {
-            ruleId: rule.id, jobId: j.id, profileVersion,
-            ruleVersion: rule.version, result: result.outcome, reasons: result.reasons,
+            ruleId: rule.id,
+            jobId: j.id,
+            profileVersion,
+            ruleVersion: rule.version,
+            result: result.outcome,
+            reasons: result.reasons,
           },
         });
 
-        if (result.outcome === 'INELIGIBLE') { ineligible++; continue; }
-        if (result.outcome === 'ELIGIBLE') eligible++; else review++;
+        if (result.outcome === 'INELIGIBLE') {
+          ineligible++;
+          continue;
+        }
+        if (result.outcome === 'ELIGIBLE') eligible++;
+        else review++;
 
         const app = await this.applications.createOrGet({
-          userId, jobId: j.id, ruleEvalJson: result,
+          userId,
+          jobId: j.id,
+          ruleEvalJson: result,
         });
         if (app.state !== 'DISCOVERED') continue;
 
         try {
-          await this.transitions.transition(app.id, 'MATCHED', { note: 'Passed deterministic rules engine' });
-          await this.transitions.transition(app.id, 'ELIGIBILITY_CHECKED', { note: `Rules: ${result.outcome}` });
+          await this.transitions.transition(app.id, 'MATCHED', {
+            note: 'Passed deterministic rules engine',
+          });
+          await this.transitions.transition(app.id, 'ELIGIBILITY_CHECKED', {
+            note: `Rules: ${result.outcome}`,
+          });
         } catch (e) {
           this.logger.warn(`Transition failed for ${app.id}: ${(e as Error).message}`);
           continue;
@@ -114,14 +146,21 @@ export class MatchRecentProcessor extends WorkerHost {
         await this.prepareQueue.add(
           'prepare',
           { applicationId: app.id },
-          { attempts: 3, backoff: { type: 'exponential', delay: 30000 }, removeOnComplete: 500, removeOnFail: 1000 },
+          {
+            attempts: 3,
+            backoff: { type: 'exponential', delay: 30000 },
+            removeOnComplete: 500,
+            removeOnFail: 1000,
+          },
         );
       }
 
       if (jobs.length < BATCH_SIZE) break;
     }
 
-    this.logger.log(`match-recent[${userId}]: examined=${examined} eligible=${eligible} review=${review} ineligible=${ineligible} created=${created}`);
+    this.logger.log(
+      `match-recent[${userId}]: examined=${examined} eligible=${eligible} review=${review} ineligible=${ineligible} created=${created}`,
+    );
     return { examined, eligible, review, ineligible, created };
   }
 }

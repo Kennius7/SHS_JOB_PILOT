@@ -41,9 +41,7 @@ export class MailerService {
     try {
       await this.sender.send(message);
     } catch (e) {
-      this.logger.error(
-        `Failed to send email via "${this.sender.name}": ${(e as Error).message}`,
-      );
+      this.logger.error(`Failed to send email via "${this.sender.name}": ${(e as Error).message}`);
     }
   }
 }

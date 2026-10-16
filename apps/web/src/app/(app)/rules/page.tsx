@@ -31,10 +31,14 @@ export default function RulesPage() {
   }, [active]);
 
   const save = useMutation({
-    mutationFn: () => active?.id
-      ? api.patch(`/v1/rules/${active.id}`, { name, conditions: draft })
-      : api.post('/v1/rules', { name, conditions: draft }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['rules'] }); setSavedAt(new Date()); },
+    mutationFn: () =>
+      active?.id
+        ? api.patch(`/v1/rules/${active.id}`, { name, conditions: draft })
+        : api.post('/v1/rules', { name, conditions: draft }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['rules'] });
+      setSavedAt(new Date());
+    },
   });
 
   const simulate = useMutation({
@@ -49,8 +53,16 @@ export default function RulesPage() {
   }
 
   function removeCondition(slot: 'hard' | 'soft', i: number) {
-    if (slot === 'hard') setDraft({ ...draft, hard: draft.hard.filter((_: any, j: number) => j !== i) });
-    else setDraft({ ...draft, soft: { ...draft.soft, conditions: draft.soft.conditions.filter((_: any, j: number) => j !== i) } });
+    if (slot === 'hard')
+      setDraft({ ...draft, hard: draft.hard.filter((_: any, j: number) => j !== i) });
+    else
+      setDraft({
+        ...draft,
+        soft: {
+          ...draft.soft,
+          conditions: draft.soft.conditions.filter((_: any, j: number) => j !== i),
+        },
+      });
   }
 
   return (
@@ -59,10 +71,18 @@ export default function RulesPage() {
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             <label className="label">Rule name</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} className="input max-w-sm" />
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="input max-w-sm"
+            />
           </div>
           <div className="flex gap-2 pt-6">
-            <button onClick={() => simulate.mutate()} disabled={simulate.isPending} className="btn-secondary">
+            <button
+              onClick={() => simulate.mutate()}
+              disabled={simulate.isPending}
+              className="btn-secondary"
+            >
               <Play className="h-4 w-4" /> {simulate.isPending ? 'Simulating…' : 'Simulate'}
             </button>
             <button onClick={() => save.mutate()} disabled={save.isPending} className="btn-primary">
@@ -70,7 +90,9 @@ export default function RulesPage() {
             </button>
           </div>
         </div>
-        {savedAt && <p className="mt-2 text-xs text-green-600">Saved at {savedAt.toLocaleTimeString()}</p>}
+        {savedAt && (
+          <p className="mt-2 text-xs text-green-600">Saved at {savedAt.toLocaleTimeString()}</p>
+        )}
       </div>
 
       <div className="card space-y-3">
@@ -78,13 +100,22 @@ export default function RulesPage() {
           <ShieldAlert className="h-5 w-5 text-red-500" />
           <div>
             <h2 className="font-semibold">Hard rules</h2>
-            <p className="text-sm text-slate-600">A single failure rejects the job outright. AI scores cannot override these.</p>
+            <p className="text-sm text-slate-600">
+              A single failure rejects the job outright. AI scores cannot override these.
+            </p>
           </div>
         </div>
         {draft.hard.map((c: any, i: number) => (
-          <ConditionRow key={i} condition={c} onChange={(next) => {
-            const copy = [...draft.hard]; copy[i] = next; setDraft({ ...draft, hard: copy });
-          }} onRemove={() => removeCondition('hard', i)} />
+          <ConditionRow
+            key={i}
+            condition={c}
+            onChange={(next) => {
+              const copy = [...draft.hard];
+              copy[i] = next;
+              setDraft({ ...draft, hard: copy });
+            }}
+            onRemove={() => removeCondition('hard', i)}
+          />
         ))}
         <button onClick={() => addCondition('hard')} className="btn-secondary">
           <Plus className="h-4 w-4" /> Add hard condition
@@ -96,23 +127,38 @@ export default function RulesPage() {
           <ShieldCheck className="h-5 w-5 text-green-500" />
           <div>
             <h2 className="font-semibold">Soft rules</h2>
-            <p className="text-sm text-slate-600">Contribute to a pass ratio. Below the ratio → job moves to REVIEW.</p>
+            <p className="text-sm text-slate-600">
+              Contribute to a pass ratio. Below the ratio → job moves to REVIEW.
+            </p>
           </div>
         </div>
         <div>
-          <label className="label">Minimum pass ratio: {(draft.soft.minPassRatio * 100).toFixed(0)}%</label>
+          <label className="label">
+            Minimum pass ratio: {(draft.soft.minPassRatio * 100).toFixed(0)}%
+          </label>
           <input
-            type="range" min={0} max={1} step={0.05}
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
             value={draft.soft.minPassRatio}
-            onChange={(e) => setDraft({ ...draft, soft: { ...draft.soft, minPassRatio: Number(e.target.value) } })}
+            onChange={(e) =>
+              setDraft({ ...draft, soft: { ...draft.soft, minPassRatio: Number(e.target.value) } })
+            }
             className="w-full max-w-md"
           />
         </div>
         {draft.soft.conditions.map((c: any, i: number) => (
-          <ConditionRow key={i} condition={c} onChange={(next) => {
-            const copy = [...draft.soft.conditions]; copy[i] = next;
-            setDraft({ ...draft, soft: { ...draft.soft, conditions: copy } });
-          }} onRemove={() => removeCondition('soft', i)} />
+          <ConditionRow
+            key={i}
+            condition={c}
+            onChange={(next) => {
+              const copy = [...draft.soft.conditions];
+              copy[i] = next;
+              setDraft({ ...draft, soft: { ...draft.soft, conditions: copy } });
+            }}
+            onRemove={() => removeCondition('soft', i)}
+          />
         ))}
         <button onClick={() => addCondition('soft')} className="btn-secondary">
           <Plus className="h-4 w-4" /> Add soft condition
@@ -122,7 +168,9 @@ export default function RulesPage() {
       <div className="card">
         <label className="label">Minimum AI match score: {draft.minMatchScore}</label>
         <input
-          type="range" min={0} max={100}
+          type="range"
+          min={0}
+          max={100}
           value={draft.minMatchScore}
           onChange={(e) => setDraft({ ...draft, minMatchScore: Number(e.target.value) })}
           className="w-full max-w-md"
@@ -146,13 +194,23 @@ export default function RulesPage() {
 
       <details className="card">
         <summary className="cursor-pointer text-sm font-medium">Raw JSON (advanced)</summary>
-        <pre className="mt-3 max-h-96 overflow-auto rounded bg-slate-50 p-3 text-xs">{JSON.stringify(draft, null, 2)}</pre>
+        <pre className="mt-3 max-h-96 overflow-auto rounded bg-slate-50 p-3 text-xs">
+          {JSON.stringify(draft, null, 2)}
+        </pre>
       </details>
     </div>
   );
 }
 
-function ConditionRow({ condition, onChange, onRemove }: { condition: any; onChange: (c: any) => void; onRemove: () => void }) {
+function ConditionRow({
+  condition,
+  onChange,
+  onRemove,
+}: {
+  condition: any;
+  onChange: (c: any) => void;
+  onRemove: () => void;
+}) {
   return (
     <div className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
       <select
@@ -172,7 +230,15 @@ function ConditionRow({ condition, onChange, onRemove }: { condition: any; onCha
         {condition.type === 'STATE_IN' && (
           <input
             value={(condition.states ?? []).join(', ')}
-            onChange={(e) => onChange({ ...condition, states: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })}
+            onChange={(e) =>
+              onChange({
+                ...condition,
+                states: e.target.value
+                  .split(',')
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+              })
+            }
             placeholder="LAGOS, FCT"
             className="input"
           />
@@ -180,14 +246,30 @@ function ConditionRow({ condition, onChange, onRemove }: { condition: any; onCha
         {condition.type === 'EMPLOYER_NOT_IN' && (
           <input
             value={(condition.employers ?? []).join(', ')}
-            onChange={(e) => onChange({ ...condition, employers: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })}
+            onChange={(e) =>
+              onChange({
+                ...condition,
+                employers: e.target.value
+                  .split(',')
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+              })
+            }
             className="input"
           />
         )}
         {condition.type === 'WORK_ARRANGEMENT_IN' && (
           <input
             value={(condition.values ?? []).join(', ')}
-            onChange={(e) => onChange({ ...condition, values: e.target.value.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean) })}
+            onChange={(e) =>
+              onChange({
+                ...condition,
+                values: e.target.value
+                  .split(',')
+                  .map((s) => s.trim().toUpperCase())
+                  .filter(Boolean),
+              })
+            }
             placeholder="REMOTE, HYBRID"
             className="input"
           />
@@ -195,7 +277,17 @@ function ConditionRow({ condition, onChange, onRemove }: { condition: any; onCha
         {condition.type === 'TITLE_MATCHES' && (
           <input
             value={(condition.patterns ?? []).join(', ')}
-            onChange={(e) => onChange({ ...condition, patterns: e.target.value.split(',').map((s) => s.trim()).filter(Boolean), mode: 'any', caseSensitive: false })}
+            onChange={(e) =>
+              onChange({
+                ...condition,
+                patterns: e.target.value
+                  .split(',')
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+                mode: 'any',
+                caseSensitive: false,
+              })
+            }
             placeholder="engineer, developer"
             className="input"
           />
@@ -205,7 +297,14 @@ function ConditionRow({ condition, onChange, onRemove }: { condition: any; onCha
             <input
               type="number"
               value={condition.amount ?? 0}
-              onChange={(e) => onChange({ ...condition, amount: Number(e.target.value), currency: 'NGN', allowMissing: true })}
+              onChange={(e) =>
+                onChange({
+                  ...condition,
+                  amount: Number(e.target.value),
+                  currency: 'NGN',
+                  allowMissing: true,
+                })
+              }
               className="input max-w-[160px]"
             />
             <span className="self-center text-xs text-slate-500">NGN / year</span>
@@ -222,7 +321,16 @@ function ConditionRow({ condition, onChange, onRemove }: { condition: any; onCha
         {condition.type === 'DESCRIPTION_NOT_CONTAINS' && (
           <input
             value={(condition.terms ?? []).join(', ')}
-            onChange={(e) => onChange({ ...condition, terms: e.target.value.split(',').map((s) => s.trim()).filter(Boolean), caseSensitive: false })}
+            onChange={(e) =>
+              onChange({
+                ...condition,
+                terms: e.target.value
+                  .split(',')
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+                caseSensitive: false,
+              })
+            }
             className="input"
           />
         )}
@@ -234,7 +342,15 @@ function ConditionRow({ condition, onChange, onRemove }: { condition: any; onCha
   );
 }
 
-function Stat({ label, value, tone = 'text-slate-900' }: { label: string; value: number; tone?: string }) {
+function Stat({
+  label,
+  value,
+  tone = 'text-slate-900',
+}: {
+  label: string;
+  value: number;
+  tone?: string;
+}) {
   return (
     <div>
       <div className="text-xs text-slate-500">{label}</div>
@@ -245,13 +361,21 @@ function Stat({ label, value, tone = 'text-slate-900' }: { label: string; value:
 
 function defaultFor(type: string): any {
   switch (type) {
-    case 'STATE_IN': return { type, states: ['LAGOS'] };
-    case 'EMPLOYER_NOT_IN': return { type, employers: [] };
-    case 'WORK_ARRANGEMENT_IN': return { type, values: ['REMOTE'] };
-    case 'TITLE_MATCHES': return { type, patterns: [], mode: 'any', caseSensitive: false };
-    case 'SALARY_MIN_AT_LEAST': return { type, amount: 0, currency: 'NGN', allowMissing: true };
-    case 'POSTED_WITHIN_DAYS': return { type, days: 30 };
-    case 'DESCRIPTION_NOT_CONTAINS': return { type, terms: [], caseSensitive: false };
-    default: return { type };
+    case 'STATE_IN':
+      return { type, states: ['LAGOS'] };
+    case 'EMPLOYER_NOT_IN':
+      return { type, employers: [] };
+    case 'WORK_ARRANGEMENT_IN':
+      return { type, values: ['REMOTE'] };
+    case 'TITLE_MATCHES':
+      return { type, patterns: [], mode: 'any', caseSensitive: false };
+    case 'SALARY_MIN_AT_LEAST':
+      return { type, amount: 0, currency: 'NGN', allowMissing: true };
+    case 'POSTED_WITHIN_DAYS':
+      return { type, days: 30 };
+    case 'DESCRIPTION_NOT_CONTAINS':
+      return { type, terms: [], caseSensitive: false };
+    default:
+      return { type };
   }
 }

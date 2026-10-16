@@ -27,7 +27,7 @@ interface RemoteOkRaw {
   company_logo?: string;
 }
 
-interface RemoteOkResponse extends Array<RemoteOkMeta | RemoteOkRaw> {}
+type RemoteOkResponse = (RemoteOkMeta | RemoteOkRaw)[];
 
 /**
  * Remote OK exposes a single endpoint with every listing (no server-side
@@ -69,20 +69,13 @@ export class RemoteOkAdapter implements JobProvider {
     const rawJobs = Array.isArray(data) ? data.filter((d): d is RemoteOkRaw => isJob(d)) : [];
 
     const keyword = q.keywords?.toLowerCase();
-    const jobs = keyword
-      ? rawJobs.filter((raw) => this.matchesKeyword(raw, keyword))
-      : rawJobs;
+    const jobs = keyword ? rawJobs.filter((raw) => this.matchesKeyword(raw, keyword)) : rawJobs;
 
     return { jobs: jobs.map((r) => this.normalize(r)) };
   }
 
   private matchesKeyword(raw: RemoteOkRaw, keyword: string): boolean {
-    const haystack = [
-      raw.title,
-      raw.company,
-      raw.description,
-      ...(raw.tags ?? []),
-    ]
+    const haystack = [raw.title, raw.company, raw.description, ...(raw.tags ?? [])]
       .join(' ')
       .toLowerCase();
     return haystack.includes(keyword);
@@ -100,20 +93,27 @@ export class RemoteOkAdapter implements JobProvider {
       employer: raw.company ?? 'Unknown',
       description: stripHtml(desc),
       location: { country: 'REMOTE', region: 'Worldwide' },
-      workArrangement: /remote|worldwide/i.test(location) || inferWorkArrangement(desc) === 'REMOTE' ? 'REMOTE' : inferWorkArrangement(desc),
+      workArrangement:
+        /remote|worldwide/i.test(location) || inferWorkArrangement(desc) === 'REMOTE'
+          ? 'REMOTE'
+          : inferWorkArrangement(desc),
       employmentType: 'FULL_TIME',
       skills: raw.tags,
       sourceUrl: raw.url ?? `https://remoteok.com/remote-jobs/`,
       applyUrl: raw.apply_url ?? raw.url,
       publishedAt: raw.date,
       attribution: 'Remote OK',
-      usageRestrictions: ['Remote OK jobs are remote-first; confirm the country each listing targets.'],
+      usageRestrictions: [
+        'Remote OK jobs are remote-first; confirm the country each listing targets.',
+      ],
     };
   }
 }
 
 function isJob(d: RemoteOkMeta | RemoteOkRaw): d is RemoteOkRaw {
-  return typeof (d as RemoteOkRaw).title === 'string' && typeof (d as RemoteOkRaw).id !== 'undefined';
+  return (
+    typeof (d as RemoteOkRaw).title === 'string' && typeof (d as RemoteOkRaw).id !== 'undefined'
+  );
 }
 
 function stripHtml(html: string): string {

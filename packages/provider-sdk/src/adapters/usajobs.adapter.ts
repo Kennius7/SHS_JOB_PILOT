@@ -16,7 +16,11 @@ interface UsaJobsDescriptor {
   PositionURI?: string;
   PositionLocation?: Array<{ LocationName?: string; CountryCode?: string }>;
   OrganizationName?: string;
-  PositionRemuneration?: Array<{ MinimumRange?: number; MaximumRange?: number; RateIntervalCode?: string }>;
+  PositionRemuneration?: Array<{
+    MinimumRange?: number;
+    MaximumRange?: number;
+    RateIntervalCode?: string;
+  }>;
   PositionSchedule?: Array<{ Name?: string }>;
   PositionOfferingType?: Array<{ Name?: string }>;
   QualificationSummary?: string;
@@ -60,7 +64,10 @@ export class UsaJobsAdapter implements JobProvider {
 
   private readonly baseUrl = 'https://data.usajobs.gov/api/search';
 
-  constructor(private apiKey: string, private email: string) {}
+  constructor(
+    private apiKey: string,
+    private email: string,
+  ) {}
 
   private headers(): Record<string, string> {
     return {
@@ -136,7 +143,10 @@ export class UsaJobsAdapter implements JobProvider {
         remuneration && remuneration.MinimumRange != null
           ? {
               min: Math.round(remuneration.MinimumRange),
-              max: remuneration.MaximumRange != null ? Math.round(remuneration.MaximumRange) : undefined,
+              max:
+                remuneration.MaximumRange != null
+                  ? Math.round(remuneration.MaximumRange)
+                  : undefined,
               currency: 'USD',
               period: mapRateInterval(remuneration.RateIntervalCode),
             }
@@ -145,7 +155,9 @@ export class UsaJobsAdapter implements JobProvider {
       applyUrl: d.ApplyURI?.[0] ?? d.PositionURI,
       publishedAt: d.PublicationStartDate,
       attribution: 'USAJOBS',
-      usageRestrictions: ['USAJOBS requires attribution and prohibits commercial redistribution of full listing text.'],
+      usageRestrictions: [
+        'USAJOBS requires attribution and prohibits commercial redistribution of full listing text.',
+      ],
     };
   }
 }

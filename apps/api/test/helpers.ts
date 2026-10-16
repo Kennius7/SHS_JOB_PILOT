@@ -34,9 +34,7 @@ export async function truncateAll(prisma: PrismaService): Promise<void> {
     .filter((t) => !t.startsWith('_prisma'))
     .map((t) => `"public"."${t}"`);
   if (names.length) {
-    await prisma.$executeRawUnsafe(
-      `TRUNCATE TABLE ${names.join(', ')} RESTART IDENTITY CASCADE`,
-    );
+    await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${names.join(', ')} RESTART IDENTITY CASCADE`);
   }
 }
 

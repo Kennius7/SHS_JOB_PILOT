@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '@shs/data';
 import {
   RuleConditionsSchema,
   evaluateRule,
   type EvalContext,
-  type RuleConditions,
   type NigerianState,
   type WorkArrangement,
   type EmploymentType,
@@ -89,9 +93,14 @@ export class RulesService {
     const now = new Date();
 
     const summary: any = {
-      evaluated: 0, eligible: 0, review: 0, ineligible: 0,
-      hardFailureCounts: {}, softFailureCounts: {},
-      sampleIneligible: [], sampleEligible: [],
+      evaluated: 0,
+      eligible: 0,
+      review: 0,
+      ineligible: 0,
+      hardFailureCounts: {},
+      softFailureCounts: {},
+      sampleIneligible: [],
+      sampleEligible: [],
     };
 
     let cursor: string | undefined;
@@ -118,7 +127,11 @@ export class RulesService {
             (summary.hardFailureCounts[f.conditionType] ?? 0) + 1;
         }
         if (result.outcome === 'INELIGIBLE' && summary.sampleIneligible.length < 10) {
-          summary.sampleIneligible.push({ jobId: job.id, title: job.title, reasons: result.reasons });
+          summary.sampleIneligible.push({
+            jobId: job.id,
+            title: job.title,
+            reasons: result.reasons,
+          });
         }
         if (result.outcome === 'ELIGIBLE' && summary.sampleEligible.length < 10) {
           summary.sampleEligible.push({ jobId: job.id, title: job.title, score: null });

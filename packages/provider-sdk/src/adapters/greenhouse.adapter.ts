@@ -106,7 +106,9 @@ export class GreenhouseAdapter implements JobProvider {
       applyUrl: raw.absolute_url,
       publishedAt: raw.updated_at,
       attribution: `${this.boardToken} via Greenhouse`,
-      usageRestrictions: ['Greenhouse terms apply; do not automate submission to employers that forbid it.'],
+      usageRestrictions: [
+        'Greenhouse terms apply; do not automate submission to employers that forbid it.',
+      ],
     };
   }
 
@@ -116,7 +118,11 @@ export class GreenhouseAdapter implements JobProvider {
   ): string | undefined {
     const item = metadata?.find((m) => m.name?.toLowerCase() === name.toLowerCase());
     if (!item) return undefined;
-    if (Array.isArray(item.value)) return item.value.map((v) => v.name).filter(Boolean).join(', ');
+    if (Array.isArray(item.value))
+      return item.value
+        .map((v) => v.name)
+        .filter(Boolean)
+        .join(', ');
     return item.value;
   }
 

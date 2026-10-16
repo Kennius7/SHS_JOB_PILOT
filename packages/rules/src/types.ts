@@ -1,20 +1,56 @@
 export type WorkArrangement = 'REMOTE' | 'HYBRID' | 'ONSITE' | 'UNKNOWN';
 export type EmploymentType =
-  | 'FULL_TIME' | 'PART_TIME' | 'CONTRACT'
-  | 'INTERNSHIP' | 'TEMPORARY' | 'UNKNOWN';
+  'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'INTERNSHIP' | 'TEMPORARY' | 'UNKNOWN';
 
 export type NigerianState =
-  | 'ABIA' | 'ADAMAWA' | 'AKWA_IBOM' | 'ANAMBRA' | 'BAUCHI' | 'BAYELSA' | 'BENUE'
-  | 'BORNO' | 'CROSS_RIVER' | 'DELTA' | 'EBONYI' | 'EDO' | 'EKITI' | 'ENUGU'
-  | 'FCT' | 'GOMBE' | 'IMO' | 'JIGAWA' | 'KADUNA' | 'KANO' | 'KATSINA' | 'KEBBI'
-  | 'KOGI' | 'KWARA' | 'LAGOS' | 'NASARAWA' | 'NIGER' | 'OGUN' | 'ONDO' | 'OSUN'
-  | 'OYO' | 'PLATEAU' | 'RIVERS' | 'SOKOTO' | 'TARABA' | 'YOBE' | 'ZAMFARA'
+  | 'ABIA'
+  | 'ADAMAWA'
+  | 'AKWA_IBOM'
+  | 'ANAMBRA'
+  | 'BAUCHI'
+  | 'BAYELSA'
+  | 'BENUE'
+  | 'BORNO'
+  | 'CROSS_RIVER'
+  | 'DELTA'
+  | 'EBONYI'
+  | 'EDO'
+  | 'EKITI'
+  | 'ENUGU'
+  | 'FCT'
+  | 'GOMBE'
+  | 'IMO'
+  | 'JIGAWA'
+  | 'KADUNA'
+  | 'KANO'
+  | 'KATSINA'
+  | 'KEBBI'
+  | 'KOGI'
+  | 'KWARA'
+  | 'LAGOS'
+  | 'NASARAWA'
+  | 'NIGER'
+  | 'OGUN'
+  | 'ONDO'
+  | 'OSUN'
+  | 'OYO'
+  | 'PLATEAU'
+  | 'RIVERS'
+  | 'SOKOTO'
+  | 'TARABA'
+  | 'YOBE'
+  | 'ZAMFARA'
   | 'UNKNOWN';
 
 export type RuleOutcome = 'ELIGIBLE' | 'INELIGIBLE' | 'REVIEW';
 
-export interface ConditionPass { pass: true }
-export interface ConditionFail { pass: false; reason: string }
+export interface ConditionPass {
+  pass: true;
+}
+export interface ConditionFail {
+  pass: false;
+  reason: string;
+}
 export type ConditionResult = ConditionPass | ConditionFail;
 
 export interface EvalContext {

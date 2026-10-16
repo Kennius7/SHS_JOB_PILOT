@@ -1,14 +1,22 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '/api';
 
 export class ApiError extends Error {
-  constructor(public status: number, public code: string, message: string) {
+  constructor(
+    public status: number,
+    public code: string,
+    message: string,
+  ) {
     super(message);
   }
 }
 
 let accessToken: string | null = null;
-export function setAccessToken(token: string | null) { accessToken = token; }
-export function getAccessToken() { return accessToken; }
+export function setAccessToken(token: string | null) {
+  accessToken = token;
+}
+export function getAccessToken() {
+  return accessToken;
+}
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
@@ -18,12 +26,18 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
 
   const res = await fetch(`${API_BASE}${path}`, {
-    ...init, headers, credentials: 'include',
+    ...init,
+    headers,
+    credentials: 'include',
   });
   if (res.status === 204) return undefined as T;
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new ApiError(res.status, body.code ?? 'UNKNOWN', body.message ?? `Request failed (${res.status})`);
+    throw new ApiError(
+      res.status,
+      body.code ?? 'UNKNOWN',
+      body.message ?? `Request failed (${res.status})`,
+    );
   }
   return body as T;
 }

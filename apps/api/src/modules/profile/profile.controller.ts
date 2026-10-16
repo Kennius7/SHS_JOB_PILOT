@@ -1,12 +1,15 @@
-import {
-  Controller, Get, Post, Patch, Body, Req, UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Req, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ProfileService } from './profile.service';
 import {
-  ProfilePatchDto, PreferencePatchDto, SkillInputDto, ExperienceInputDto,
-  EducationInputDto, ApplyParsedDto, OnboardingStepDto,
+  ProfilePatchDto,
+  PreferencePatchDto,
+  SkillInputDto,
+  ExperienceInputDto,
+  EducationInputDto,
+  ApplyParsedDto,
+  OnboardingStepDto,
 } from './dto';
 
 @ApiTags('profile')

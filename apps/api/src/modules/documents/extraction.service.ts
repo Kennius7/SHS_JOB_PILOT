@@ -1,16 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { promises as fs } from 'fs';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const pdfParse = require('pdf-parse');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const mammoth = require('mammoth');
 
 @Injectable()
 export class ExtractionService {
   private readonly logger = new Logger(ExtractionService.name);
 
-  async extract(absolutePath: string, mimeType: string): Promise<{ text: string; needsOcr: boolean }> {
+  async extract(
+    absolutePath: string,
+    mimeType: string,
+  ): Promise<{ text: string; needsOcr: boolean }> {
     const buffer = await fs.readFile(absolutePath);
 
     if (mimeType === 'application/pdf') {

@@ -14,13 +14,21 @@ export default function OnboardingPage() {
   const { step, isLoading } = useOnboarding();
   if (isLoading) return <div className="text-center text-sm text-slate-500">Loading…</div>;
   switch (step) {
-    case 'welcome': return <WelcomeStep />;
-    case 'review-cv': return <ReviewCvStep />;
-    case 'contact': return <ContactStep />;
-    case 'career': return <CareerStep />;
-    case 'skills': return <SkillsStep />;
-    case 'preferences': return <PreferencesStep />;
-    case 'rules': return <RulesStep />;
-    case 'done': return <DoneStep />;
+    case 'welcome':
+      return <WelcomeStep />;
+    case 'review-cv':
+      return <ReviewCvStep />;
+    case 'contact':
+      return <ContactStep />;
+    case 'career':
+      return <CareerStep />;
+    case 'skills':
+      return <SkillsStep />;
+    case 'preferences':
+      return <PreferencesStep />;
+    case 'rules':
+      return <RulesStep />;
+    case 'done':
+      return <DoneStep />;
   }
 }

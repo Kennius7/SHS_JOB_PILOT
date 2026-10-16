@@ -8,7 +8,10 @@ export class ProvidersService implements OnModuleInit {
   private readonly logger = new Logger(ProvidersService.name);
   private registry: ProviderRegistry;
 
-  constructor(private config: ConfigService, private prisma: PrismaService) {
+  constructor(
+    private config: ConfigService,
+    private prisma: PrismaService,
+  ) {
     this.registry = buildRegistry(
       {
         adzunaAppId: config.get('PROVIDER_ADZUNA_APP_ID'),
@@ -67,9 +70,15 @@ export class ProvidersService implements OnModuleInit {
         },
       });
     }
-    this.logger.log(`Registered ${this.registry.list().length} active + ${this.registry.listManual().length} manual providers`);
+    this.logger.log(
+      `Registered ${this.registry.list().length} active + ${this.registry.listManual().length} manual providers`,
+    );
   }
 
-  get(key: string) { return this.registry.get(key); }
-  registry_() { return this.registry; }
+  get(key: string) {
+    return this.registry.get(key);
+  }
+  registry_() {
+    return this.registry;
+  }
 }

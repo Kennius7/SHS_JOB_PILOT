@@ -17,7 +17,9 @@ export class PrepareApplicationProcessor extends WorkerHost {
     private ai: AiService,
     private providers: ProvidersService,
     @InjectQueue(QUEUES.submission) private submissionQueue: Queue,
-  ) { super(); }
+  ) {
+    super();
+  }
 
   async process(job: Job<{ applicationId: string }>) {
     const { applicationId } = job.data;
@@ -31,7 +33,9 @@ export class PrepareApplicationProcessor extends WorkerHost {
             profile: {
               include: {
                 skills: { include: { skill: true } },
-                experiences: true, preferences: true, education: true,
+                experiences: true,
+                preferences: true,
+                education: true,
               },
             },
             rules: { where: { isActive: true }, take: 1 },
@@ -58,8 +62,12 @@ export class PrepareApplicationProcessor extends WorkerHost {
     const matchScore = await this.getOrComputeMatch(app, profile, conditions);
 
     if (matchScore === null) {
-      await this.transitions.transition(applicationId, 'DRAFT_PREPARED', { note: 'Draft without AI scoring' });
-      await this.transitions.transition(applicationId, 'AWAITING_APPROVAL', { note: 'AI unavailable — manual review' });
+      await this.transitions.transition(applicationId, 'DRAFT_PREPARED', {
+        note: 'Draft without AI scoring',
+      });
+      await this.transitions.transition(applicationId, 'AWAITING_APPROVAL', {
+        note: 'AI unavailable — manual review',
+      });
       return { outcome: 'awaiting_approval', reason: 'ai-unavailable' };
     }
 
@@ -85,7 +93,10 @@ export class PrepareApplicationProcessor extends WorkerHost {
         note: matchScore.hardEligibilityFail
           ? 'Missing mandatory qualification per AI analysis'
           : `Match score below threshold`,
-        metadata: { matchScore: matchScore.overallScore, missingRequired: matchScore.missingRequired },
+        metadata: {
+          matchScore: matchScore.overallScore,
+          missingRequired: matchScore.missingRequired,
+        },
       });
       return { outcome: 'skipped' };
     }
@@ -104,15 +115,22 @@ export class PrepareApplicationProcessor extends WorkerHost {
             fullName: profile.fullName ?? undefined,
             skills: profile.skills.map((s) => s.skill.name),
             experience: profile.experiences.map((e) => ({
-              title: e.title, employer: e.employer, highlights: e.highlights,
+              title: e.title,
+              employer: e.employer,
+              highlights: e.highlights,
             })),
             education: profile.education.map((e) => ({
-              institution: e.institution, degree: e.degree ?? undefined,
+              institution: e.institution,
+              degree: e.degree ?? undefined,
             })),
             yearsExperience: profile.yearsExperience ?? undefined,
             summary: profile.summary ?? undefined,
           },
-          job: { title: app.job.title, employer: app.job.employer, description: app.job.description ?? '' },
+          job: {
+            title: app.job.title,
+            employer: app.job.employer,
+            description: app.job.description ?? '',
+          },
           tone: 'professional',
         });
         if (coverLetter) {
@@ -127,7 +145,11 @@ export class PrepareApplicationProcessor extends WorkerHost {
 
     await this.transitions.transition(applicationId, 'DRAFT_PREPARED', {
       note: 'Draft prepared',
-      metadata: { finalOutcome, matchScore: matchScore.overallScore, hasCoverLetter: !!coverLetter },
+      metadata: {
+        finalOutcome,
+        matchScore: matchScore.overallScore,
+        hasCoverLetter: !!coverLetter,
+      },
     });
 
     const provider = this.providers.get(app.job.providerKey);
@@ -141,12 +163,16 @@ export class PrepareApplicationProcessor extends WorkerHost {
     }
 
     if (finalOutcome === 'REVIEW') {
-      await this.transitions.transition(applicationId, 'AWAITING_APPROVAL', { note: 'Below threshold' });
+      await this.transitions.transition(applicationId, 'AWAITING_APPROVAL', {
+        note: 'Below threshold',
+      });
       return { outcome: 'awaiting_approval', reason: 'review' };
     }
 
     if (!prefs?.autoSubmitEnabled) {
-      await this.transitions.transition(applicationId, 'AWAITING_APPROVAL', { note: 'Auto-submit disabled' });
+      await this.transitions.transition(applicationId, 'AWAITING_APPROVAL', {
+        note: 'Auto-submit disabled',
+      });
       return { outcome: 'awaiting_approval', reason: 'auto-disabled' };
     }
 
@@ -187,10 +213,13 @@ export class PrepareApplicationProcessor extends WorkerHost {
           fullName: profile.fullName ?? undefined,
           skills: profile.skills.map((s: any) => s.skill.name),
           experience: profile.experiences.map((e: any) => ({
-            title: e.title, employer: e.employer, highlights: e.highlights,
+            title: e.title,
+            employer: e.employer,
+            highlights: e.highlights,
           })),
           education: profile.education.map((e: any) => ({
-            institution: e.institution, degree: e.degree ?? undefined,
+            institution: e.institution,
+            degree: e.degree ?? undefined,
           })),
           yearsExperience: profile.yearsExperience ?? undefined,
         },
@@ -202,10 +231,15 @@ export class PrepareApplicationProcessor extends WorkerHost {
           salaryCurrency: profile.preferences?.salaryCurrency ?? 'NGN',
         },
         job: {
-          title: app.job.title, employer: app.job.employer, description: app.job.description ?? '',
-          requiredSkills: app.job.requiredSkills, preferredSkills: app.job.preferredSkills,
-          state: app.job.state ?? undefined, workArrangement: app.job.workArrangement,
-          salaryMin: app.job.salaryMin ?? undefined, salaryMax: app.job.salaryMax ?? undefined,
+          title: app.job.title,
+          employer: app.job.employer,
+          description: app.job.description ?? '',
+          requiredSkills: app.job.requiredSkills,
+          preferredSkills: app.job.preferredSkills,
+          state: app.job.state ?? undefined,
+          workArrangement: app.job.workArrangement,
+          salaryMin: app.job.salaryMin ?? undefined,
+          salaryMax: app.job.salaryMax ?? undefined,
           salaryCurrency: app.job.salaryCurrency ?? undefined,
         },
       });
@@ -213,16 +247,23 @@ export class PrepareApplicationProcessor extends WorkerHost {
       await this.prisma.jobMatch.upsert({
         where: { userId_jobId: { userId: app.userId, jobId: app.jobId } },
         create: {
-          userId: app.userId, jobId: app.jobId,
-          overallScore: score.overallScore, breakdown: score.breakdown as any,
-          missingRequired: score.missingRequired, reasons: score.reasons,
-          hardEligibilityFail: score.hardEligibilityFail, profileVersion: profile.version,
+          userId: app.userId,
+          jobId: app.jobId,
+          overallScore: score.overallScore,
+          breakdown: score.breakdown as any,
+          missingRequired: score.missingRequired,
+          reasons: score.reasons,
+          hardEligibilityFail: score.hardEligibilityFail,
+          profileVersion: profile.version,
           modelVersion: process.env.AI_MODEL ?? 'gemini-3.8-flash',
         },
         update: {
-          overallScore: score.overallScore, breakdown: score.breakdown as any,
-          missingRequired: score.missingRequired, reasons: score.reasons,
-          hardEligibilityFail: score.hardEligibilityFail, profileVersion: profile.version,
+          overallScore: score.overallScore,
+          breakdown: score.breakdown as any,
+          missingRequired: score.missingRequired,
+          reasons: score.reasons,
+          hardEligibilityFail: score.hardEligibilityFail,
+          profileVersion: profile.version,
           modelVersion: process.env.AI_MODEL ?? 'gemini-3.8-flash',
         },
       });

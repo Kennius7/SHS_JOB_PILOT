@@ -9,9 +9,16 @@ import { SchedulerService } from '../scheduler/scheduler.service';
 import { QUEUES } from '../queues';
 
 const DEFAULT_KEYWORDS = [
-  'software engineer', 'data analyst', 'product manager',
-  'finance', 'sales', 'marketing', 'operations',
-  'human resources', 'mechanical engineer', 'customer service',
+  'software engineer',
+  'data analyst',
+  'product manager',
+  'finance',
+  'sales',
+  'marketing',
+  'operations',
+  'human resources',
+  'mechanical engineer',
+  'customer service',
 ];
 
 interface ProviderSyncConfig {
@@ -29,12 +36,29 @@ const SYNC_CONFIGS: Record<string, ProviderSyncConfig> = {
   adzuna: { keywords: DEFAULT_KEYWORDS, pages: 2, resultsPerPage: 50 },
   jooble: { keywords: DEFAULT_KEYWORDS, pages: 1, resultsPerPage: 50 },
   usajobs: {
-    keywords: ['software engineer', 'data analyst', 'product manager', 'finance', 'sales', 'customer service'],
+    keywords: [
+      'software engineer',
+      'data analyst',
+      'product manager',
+      'finance',
+      'sales',
+      'customer service',
+    ],
     pages: 1,
     resultsPerPage: 100,
   },
   remotive: {
-    keywords: ['software', 'engineer', 'data', 'design', 'product', 'sales', 'marketing', 'support', 'finance'],
+    keywords: [
+      'software',
+      'engineer',
+      'data',
+      'design',
+      'product',
+      'sales',
+      'marketing',
+      'support',
+      'finance',
+    ],
     pages: 1,
     resultsPerPage: 100,
   },
@@ -71,7 +95,11 @@ export class ProviderSyncProcessor extends WorkerHost {
     if (!availability.available) {
       await this.prisma.jobProvider.update({
         where: { key: providerKey },
-        data: { healthy: false, lastError: availability.reason ?? 'unavailable', lastErrorAt: new Date() },
+        data: {
+          healthy: false,
+          lastError: availability.reason ?? 'unavailable',
+          lastErrorAt: new Date(),
+        },
       });
       return { skipped: availability.reason };
     }
@@ -82,7 +110,10 @@ export class ProviderSyncProcessor extends WorkerHost {
 
     const config = SYNC_CONFIGS[providerKey] ?? DEFAULT_CONFIG;
     const syncStartedAt = new Date();
-    let jobsFound = 0, jobsNew = 0, jobsDuplicate = 0, jobsRejected = 0;
+    let jobsFound = 0,
+      jobsNew = 0,
+      jobsDuplicate = 0,
+      jobsRejected = 0;
 
     try {
       const queries: Array<{ keywords?: string }> = config.fetchOnce
@@ -119,7 +150,10 @@ export class ProviderSyncProcessor extends WorkerHost {
               });
               jobsNew++;
             } catch (e: any) {
-              if (e.code === 'P2002') { jobsDuplicate++; continue; }
+              if (e.code === 'P2002') {
+                jobsDuplicate++;
+                continue;
+              }
               throw e;
             }
           }
@@ -129,8 +163,12 @@ export class ProviderSyncProcessor extends WorkerHost {
       await this.prisma.providerSyncRun.update({
         where: { id: run.id },
         data: {
-          status: 'SUCCESS', finishedAt: new Date(),
-          jobsFound, jobsNew, jobsDuplicate, jobsRejected,
+          status: 'SUCCESS',
+          finishedAt: new Date(),
+          jobsFound,
+          jobsNew,
+          jobsDuplicate,
+          jobsRejected,
         },
       });
       await this.prisma.jobProvider.update({
@@ -142,7 +180,9 @@ export class ProviderSyncProcessor extends WorkerHost {
         await this.scheduler.fanOutMatchRecent(syncStartedAt);
       }
 
-      this.logger.log(`Sync ${providerKey}: found=${jobsFound} new=${jobsNew} dup=${jobsDuplicate}`);
+      this.logger.log(
+        `Sync ${providerKey}: found=${jobsFound} new=${jobsNew} dup=${jobsDuplicate}`,
+      );
       return { providerKey, jobsFound, jobsNew, jobsDuplicate };
     } catch (e) {
       await this.prisma.providerSyncRun.update({

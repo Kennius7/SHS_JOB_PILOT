@@ -43,7 +43,10 @@ export class JoobleAdapter implements JobProvider {
 
   private readonly baseUrl = 'https://jooble.org/api';
 
-  constructor(private apiKey: string, private country = 'ng') {}
+  constructor(
+    private apiKey: string,
+    private country = 'ng',
+  ) {}
 
   async checkAvailability(): Promise<{ available: boolean; reason?: string }> {
     try {

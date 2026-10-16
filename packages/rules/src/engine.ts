@@ -28,7 +28,9 @@ export function evaluateRule(conditions: RuleConditions, ctx: EvalContext): Rule
 
   const reasons: string[] = [];
   if (soft.total > 0) {
-    reasons.push(`Soft conditions: ${soft.passed}/${soft.total} passed (${(softRatio * 100).toFixed(0)}%)`);
+    reasons.push(
+      `Soft conditions: ${soft.passed}/${soft.total} passed (${(softRatio * 100).toFixed(0)}%)`,
+    );
   }
   for (const f of soft.failures) reasons.push(`${f.conditionType}: ${f.reason}`);
 

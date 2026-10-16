@@ -4,7 +4,15 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Activity, Database, History, Layers, RefreshCw, Server, ShieldAlert, Wifi, XCircle,
+  Activity,
+  Database,
+  History,
+  Layers,
+  RefreshCw,
+  Server,
+  ShieldAlert,
+  Wifi,
+  XCircle,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
@@ -40,9 +48,16 @@ interface QueueCounts {
   failed: number;
   delayed: number;
 }
-interface QueueInfo { name: string; counts: QueueCounts; paused: boolean }
+interface QueueInfo {
+  name: string;
+  counts: QueueCounts;
+  paused: boolean;
+}
 
-interface HealthCheck { ok: boolean; detail?: string }
+interface HealthCheck {
+  ok: boolean;
+  detail?: string;
+}
 interface HealthResponse {
   status: 'ok' | 'degraded';
   checks: Record<string, HealthCheck>;
@@ -113,9 +128,10 @@ export default function AdminPage() {
   const [auditAction, setAuditAction] = useState('');
   const audit = useQuery({
     queryKey: ['admin-audit', auditPage, auditAction],
-    queryFn: () => api.get<AuditResponse>(
-      `/v1/admin/audit?page=${auditPage}&limit=25${auditAction ? `&action=${auditAction}` : ''}`,
-    ),
+    queryFn: () =>
+      api.get<AuditResponse>(
+        `/v1/admin/audit?page=${auditPage}&limit=25${auditAction ? `&action=${auditAction}` : ''}`,
+      ),
     enabled: user?.role === 'ADMIN',
   });
 
@@ -140,7 +156,9 @@ export default function AdminPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold">Admin console</h1>
-          <p className="text-sm text-slate-500">Platform health, job queues, and provider registry.</p>
+          <p className="text-sm text-slate-500">
+            Platform health, job queues, and provider registry.
+          </p>
         </div>
         <button onClick={invalidateAll} className="btn-secondary">
           <RefreshCw className="h-4 w-4" /> Refresh
@@ -152,11 +170,17 @@ export default function AdminPage() {
         {Object.entries(health.data?.checks ?? {}).map(([name, check]) => (
           <div key={name} className="card">
             <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-900">
-              {name === 'database' ? <Database className="h-4 w-4 text-slate-400" /> : <Wifi className="h-4 w-4 text-slate-400" />}
+              {name === 'database' ? (
+                <Database className="h-4 w-4 text-slate-400" />
+              ) : (
+                <Wifi className="h-4 w-4 text-slate-400" />
+              )}
               {name}
             </div>
             <Badge ok={check.ok} />
-            {check.detail && <p className="mt-2 break-all text-xs text-slate-400">{check.detail}</p>}
+            {check.detail && (
+              <p className="mt-2 break-all text-xs text-slate-400">{check.detail}</p>
+            )}
           </div>
         ))}
         <div className="card">
@@ -165,7 +189,9 @@ export default function AdminPage() {
           </div>
           <p className="text-sm text-slate-600">
             <span className="text-green-700">
-              {(health.data?.providers ?? []).filter((p) => p.healthy).reduce((n, p) => n + p.count, 0)}
+              {(health.data?.providers ?? [])
+                .filter((p) => p.healthy)
+                .reduce((n, p) => n + p.count, 0)}
             </span>
             {' / '}
             {(health.data?.providers ?? []).reduce((n, p) => n + p.count, 0)} healthy
@@ -204,7 +230,9 @@ export default function AdminPage() {
                     <td className="px-4 py-2">{q.counts.active}</td>
                     <td className="px-4 py-2">{q.counts.delayed}</td>
                     <td className="px-4 py-2 text-slate-500">{q.counts.completed}</td>
-                    <td className={`px-4 py-2 ${q.counts.failed > 0 ? 'text-red-600' : 'text-slate-500'}`}>
+                    <td
+                      className={`px-4 py-2 ${q.counts.failed > 0 ? 'text-red-600' : 'text-slate-500'}`}
+                    >
                       {q.counts.failed}
                     </td>
                     <td className="py-2 text-right">
@@ -263,10 +291,15 @@ export default function AdminPage() {
                         </span>
                       </td>
                       <td className="px-4 py-2">{p.capabilities.searchJobs ? 'Yes' : '—'}</td>
-                      <td className="px-4 py-2">{p.capabilities.submitApplications ? 'Yes' : '—'}</td>
+                      <td className="px-4 py-2">
+                        {p.capabilities.submitApplications ? 'Yes' : '—'}
+                      </td>
                       <td className="px-4 py-2">
                         {error ? (
-                          <span className="inline-flex items-center gap-1 text-red-700" title={error}>
+                          <span
+                            className="inline-flex items-center gap-1 text-red-700"
+                            title={error}
+                          >
                             <XCircle className="h-3.5 w-3.5" /> error
                           </span>
                         ) : p.healthy ? (
@@ -320,7 +353,9 @@ export default function AdminPage() {
           >
             <option value="">All actions</option>
             {AUDIT_ACTIONS.map((a) => (
-              <option key={a} value={a}>{a}</option>
+              <option key={a} value={a}>
+                {a}
+              </option>
             ))}
           </select>
         </div>

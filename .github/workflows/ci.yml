@@ -13,12 +13,12 @@ concurrency:
 
 jobs:
   verify:
-    name: Typecheck · Unit tests · Build
+    name: Lint · Typecheck · Unit tests · Build
     runs-on: ubuntu-latest
     env:
       JWT_SECRET: ci-only-not-a-real-secret-0000000000000000000000
       SESSION_SECRET: ci-only-not-a-real-secret-0000000000000000000000
-      AI_MOCK_MODE: "true"
+      AI_MOCK_MODE: 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,6 +29,10 @@ jobs:
         run: npm ci
       - name: Generate Prisma client
         run: npx prisma generate --schema=prisma/schema.prisma
+      - name: Lint
+        run: npm run lint
+      - name: Format check
+        run: npm run format:check
       - name: Typecheck
         run: npm run typecheck
       - name: Unit tests
@@ -69,7 +73,7 @@ jobs:
       REDIS_URL: redis://localhost:6379
       JWT_SECRET: ci-only-not-a-real-secret-0000000000000000000000
       SESSION_SECRET: ci-only-not-a-real-secret-0000000000000000000000
-      AI_MOCK_MODE: "true"
+      AI_MOCK_MODE: 'true'
       DOCUMENT_STORAGE_PATH: ./.data/test-documents
     steps:
       - uses: actions/checkout@v4

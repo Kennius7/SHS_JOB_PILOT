@@ -18,7 +18,9 @@ export class SubmissionProcessor extends WorkerHost {
     private providers: ProvidersService,
     @InjectQueue(QUEUES.submission) private submissionQueue: Queue,
     @InjectQueue(QUEUES.verification) private verificationQueue: Queue,
-  ) { super(); }
+  ) {
+    super();
+  }
 
   async process(job: Job<{ applicationId: string }>) {
     const { applicationId } = job.data;
@@ -43,8 +45,10 @@ export class SubmissionProcessor extends WorkerHost {
           });
           await tx.applicationAttempt.create({
             data: {
-              applicationId, attemptNumber,
-              outcome: 'IN_PROGRESS', idempotencyKey: attemptKey,
+              applicationId,
+              attemptNumber,
+              outcome: 'IN_PROGRESS',
+              idempotencyKey: attemptKey,
             },
           });
         },
@@ -58,7 +62,9 @@ export class SubmissionProcessor extends WorkerHost {
       await this.transitions.transition(applicationId, 'FAILED', {
         lastError: `Provider ${app.job.providerKey} has no submission support`,
       });
-      await markAttempt(this.prisma, attemptKey, 'REJECTED', { errorMessage: 'No provider submission' });
+      await markAttempt(this.prisma, attemptKey, 'REJECTED', {
+        errorMessage: 'No provider submission',
+      });
       return { failed: 'no-provider-submission' };
     }
 
@@ -69,7 +75,8 @@ export class SubmissionProcessor extends WorkerHost {
     });
     if (!resumeDoc) {
       await this.transitions.transition(applicationId, 'NEEDS_USER_INPUT', {
-        note: 'No CV on file', metadata: { missing: ['resume'] },
+        note: 'No CV on file',
+        metadata: { missing: ['resume'] },
       });
       await markAttempt(this.prisma, attemptKey, 'NEEDS_INPUT', { errorMessage: 'No CV on file' });
       return { needsInput: 'resume' };
@@ -111,25 +118,29 @@ export class SubmissionProcessor extends WorkerHost {
           note: `Missing fields: ${result.needsUserInput.join(', ')}`,
           metadata: { missingFields: result.needsUserInput },
         });
-        await markAttempt(this.prisma, attemptKey, 'NEEDS_INPUT', { errorMessage: 'Missing required fields' });
+        await markAttempt(this.prisma, attemptKey, 'NEEDS_INPUT', {
+          errorMessage: 'Missing required fields',
+        });
         return { needsInput: result.needsUserInput };
       }
 
       const retryable = result.error?.retryable ?? false;
-      await markAttempt(
-        this.prisma,
-        attemptKey,
-        retryable ? 'NETWORK_ERROR' : 'REJECTED',
-        { errorCode: result.error?.code, errorMessage: result.error?.message },
-      );
+      await markAttempt(this.prisma, attemptKey, retryable ? 'NETWORK_ERROR' : 'REJECTED', {
+        errorCode: result.error?.code,
+        errorMessage: result.error?.message,
+      });
 
       if (retryable && attemptNumber < MAX_RETRY_ATTEMPTS) {
         await this.transitions.transition(applicationId, 'QUEUED', {
           note: `Retry scheduled (attempt ${attemptNumber}/${MAX_RETRY_ATTEMPTS})`,
         });
-        await this.submissionQueue.add('submit', { applicationId }, {
-          delay: RETRY_BACKOFF_MS[attemptNumber - 1] ?? RETRY_BACKOFF_MS[0],
-        });
+        await this.submissionQueue.add(
+          'submit',
+          { applicationId },
+          {
+            delay: RETRY_BACKOFF_MS[attemptNumber - 1] ?? RETRY_BACKOFF_MS[0],
+          },
+        );
       } else {
         await this.transitions.transition(applicationId, 'FAILED', {
           lastError: result.error?.message ?? 'Provider rejected submission',
@@ -138,17 +149,25 @@ export class SubmissionProcessor extends WorkerHost {
       return { failed: true };
     } catch (e: any) {
       const isTimeout = e.code === 'ETIMEDOUT' || e.name === 'AbortError';
-      await markAttempt(this.prisma, attemptKey, isTimeout ? 'UNKNOWN' : 'NETWORK_ERROR', { errorMessage: e.message });
+      await markAttempt(this.prisma, attemptKey, isTimeout ? 'UNKNOWN' : 'NETWORK_ERROR', {
+        errorMessage: e.message,
+      });
 
       if (isTimeout) {
         await this.transitions.transition(applicationId, 'UNKNOWN_OUTCOME', {
           lastError: 'Timeout — provider may or may not have received the submission',
         });
       } else if (attemptNumber < MAX_RETRY_ATTEMPTS) {
-        await this.transitions.transition(applicationId, 'QUEUED', { note: 'Retry after network error' });
-        await this.submissionQueue.add('submit', { applicationId }, {
-          delay: RETRY_BACKOFF_MS[attemptNumber - 1] ?? RETRY_BACKOFF_MS[0],
+        await this.transitions.transition(applicationId, 'QUEUED', {
+          note: 'Retry after network error',
         });
+        await this.submissionQueue.add(
+          'submit',
+          { applicationId },
+          {
+            delay: RETRY_BACKOFF_MS[attemptNumber - 1] ?? RETRY_BACKOFF_MS[0],
+          },
+        );
       } else {
         await this.transitions.transition(applicationId, 'FAILED', { lastError: e.message });
       }

@@ -106,7 +106,9 @@ export class LeverAdapter implements JobProvider {
       employer: this.company,
       description: description || undefined,
       location: this.parseLocation(location),
-      workArrangement: workplaceType ? inferWorkArrangement(`${workplaceType} ${location}`) : inferWorkArrangement(location),
+      workArrangement: workplaceType
+        ? inferWorkArrangement(`${workplaceType} ${location}`)
+        : inferWorkArrangement(location),
       employmentType: mapEmploymentType(categories.commitment),
       salary: raw.salaryRange
         ? {
@@ -120,7 +122,9 @@ export class LeverAdapter implements JobProvider {
       applyUrl: raw.applyUrl,
       publishedAt: raw.createdAt ? new Date(raw.createdAt).toISOString() : undefined,
       attribution: `${this.company} via Lever`,
-      usageRestrictions: ['Lever terms apply; do not automate submission to employers that forbid it.'],
+      usageRestrictions: [
+        'Lever terms apply; do not automate submission to employers that forbid it.',
+      ],
     };
   }
 

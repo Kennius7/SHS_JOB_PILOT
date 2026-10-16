@@ -65,11 +65,15 @@ export default function NotificationsPage() {
               key={n.id}
               className={`card flex items-start gap-3 ${n.readAt ? '' : 'border-l-4 border-l-brand-500'}`}
             >
-              <Bell className={`mt-0.5 h-4 w-4 shrink-0 ${n.readAt ? 'text-slate-300' : 'text-brand-500'}`} />
+              <Bell
+                className={`mt-0.5 h-4 w-4 shrink-0 ${n.readAt ? 'text-slate-300' : 'text-brand-500'}`}
+              />
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-slate-900">{n.title}</p>
                 <p className="text-sm text-slate-600">{n.body}</p>
-                <p className="mt-1 text-xs text-slate-400">{new Date(n.createdAt).toLocaleString()}</p>
+                <p className="mt-1 text-xs text-slate-400">
+                  {new Date(n.createdAt).toLocaleString()}
+                </p>
               </div>
               {!n.readAt && (
                 <button

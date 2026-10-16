@@ -24,9 +24,7 @@ export class GeminiAdapter implements AiAdapter {
 
   constructor(apiKey: string, model = 'gemini-3.8-flash') {
     this.model = model;
-    this.clientPromise = import('@google/genai').then(
-      (mod) => new mod.GoogleGenAI({ apiKey }),
-    );
+    this.clientPromise = import('@google/genai').then((mod) => new mod.GoogleGenAI({ apiKey }));
   }
 
   private get client(): Promise<GoogleGenAI> {
@@ -34,7 +32,9 @@ export class GeminiAdapter implements AiAdapter {
   }
 
   async parseCv(text: string): Promise<ParsedCv> {
-    const res = await (await this.client).models.generateContent({
+    const res = await (
+      await this.client
+    ).models.generateContent({
       model: this.model,
       contents: [
         {
@@ -59,7 +59,9 @@ export class GeminiAdapter implements AiAdapter {
   }
 
   async scoreMatch(input: MatchInput): Promise<MatchScore> {
-    const res = await (await this.client).models.generateContent({
+    const res = await (
+      await this.client
+    ).models.generateContent({
       model: this.model,
       contents: [{ role: 'user', parts: [{ text: this.buildMatchPrompt(input) }] }],
       config: {
@@ -75,7 +77,9 @@ export class GeminiAdapter implements AiAdapter {
   }
 
   async generateCoverLetter(input: CoverLetterInput): Promise<string> {
-    const res = await (await this.client).models.generateContent({
+    const res = await (
+      await this.client
+    ).models.generateContent({
       model: this.model,
       contents: [{ role: 'user', parts: [{ text: this.buildCoverLetterPrompt(input) }] }],
       config: {

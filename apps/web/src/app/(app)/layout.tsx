@@ -5,7 +5,15 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import {
-  LayoutDashboard, Briefcase, FileText, ListChecks, Settings, Shield, LogOut, Bell, ShieldCheck,
+  LayoutDashboard,
+  Briefcase,
+  FileText,
+  ListChecks,
+  Settings,
+  Shield,
+  LogOut,
+  Bell,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
@@ -19,9 +27,7 @@ const NAV = [
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
-const ADMIN_NAV = [
-  { href: '/admin', label: 'Admin', icon: ShieldCheck },
-];
+const ADMIN_NAV = [{ href: '/admin', label: 'Admin', icon: ShieldCheck }];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, logout } = useAuth();
@@ -53,7 +59,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [user, profile, isOnboarding, router]);
 
   if (loading || !user) {
-    return <div className="flex min-h-screen items-center justify-center text-slate-500">Loading…</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center text-slate-500">Loading…</div>
+    );
   }
 
   if (isOnboarding) {
@@ -75,7 +83,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 key={href}
                 href={href}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
-                  active ? 'bg-brand-50 text-brand-700 font-medium' : 'text-slate-600 hover:bg-slate-50'
+                  active
+                    ? 'bg-brand-50 text-brand-700 font-medium'
+                    : 'text-slate-600 hover:bg-slate-50'
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -91,7 +101,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   key={href}
                   href={href}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
-                    active ? 'bg-brand-50 text-brand-700 font-medium' : 'text-slate-600 hover:bg-slate-50'
+                    active
+                      ? 'bg-brand-50 text-brand-700 font-medium'
+                      : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -102,7 +114,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </nav>
         <div className="border-t border-slate-200 p-3">
           <div className="mb-2 truncate px-3 text-xs text-slate-500">{user.email}</div>
-          <button onClick={logout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">
+          <button
+            onClick={logout}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
+          >
             <LogOut className="h-4 w-4" />
             Sign out
           </button>

@@ -18,7 +18,12 @@ export default function JobDetailPage() {
         <p className="text-sm text-slate-600">{job.employer}</p>
         {job.attribution && <p className="mt-2 text-xs text-brand-700">{job.attribution}</p>}
         {job.applyUrl && (
-          <a href={job.applyUrl} target="_blank" rel="noopener noreferrer" className="btn-primary mt-4">
+          <a
+            href={job.applyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary mt-4"
+          >
             Apply on site
           </a>
         )}

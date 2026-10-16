@@ -1,6 +1,14 @@
 import {
-  IsArray, IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUrl,
-  Max, MaxLength, Min,
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Max,
+  MaxLength,
+  Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { NigerianState, EmploymentType } from '@prisma/client';
@@ -32,7 +40,10 @@ export class PreferencePatchDto {
   @IsOptional() @IsBoolean() onsiteAllowed?: boolean;
   @IsOptional() @Type(() => Number) @IsInt() @Min(0) salaryFloor?: number;
   @IsOptional() @IsString() @MaxLength(3) salaryCurrency?: string;
-  @IsOptional() @IsArray() @IsEnum(EmploymentType, { each: true }) employmentTypes?: EmploymentType[];
+  @IsOptional()
+  @IsArray()
+  @IsEnum(EmploymentType, { each: true })
+  employmentTypes?: EmploymentType[];
   @IsOptional() @IsArray() @IsString({ each: true }) preferredIndustries?: string[];
   @IsOptional() @IsArray() @IsString({ each: true }) excludedIndustries?: string[];
   @IsOptional() @IsArray() @IsString({ each: true }) excludedCompanies?: string[];
@@ -71,7 +82,9 @@ export class EducationInputDto {
 
 export class ApplyParsedDto {
   @IsString() documentId!: string;
-  @IsOptional() @IsArray() @IsString({ each: true })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   acceptedSections?: ('contact' | 'skills' | 'experience' | 'education' | 'summary')[];
   @IsOptional() profile?: ProfilePatchDto;
   @IsOptional() @IsArray() skills?: SkillInputDto[];

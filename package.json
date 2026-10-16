@@ -3,7 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "packageManager": "npm@10.9.0",
-  "engines": { "node": ">=20.11.0" },
+  "engines": {
+    "node": ">=20.11.0"
+  },
   "workspaces": [
     "packages/*",
     "apps/*"
@@ -11,7 +13,9 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "lint": "turbo run lint",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
@@ -19,13 +23,20 @@
     "prisma:migrate": "prisma migrate dev --schema=prisma/schema.prisma",
     "prisma:deploy": "prisma migrate deploy --schema=prisma/schema.prisma",
     "prisma:studio": "prisma studio --schema=prisma/schema.prisma",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "db:seed:admin": "tsx prisma/seed-admin.ts"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.10.2",
+    "eslint": "^10.12.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^15.15.0",
+    "prettier": "^3.9.10",
     "prisma": "^6.1.0",
     "tsx": "^4.19.2",
     "turbo": "^2.3.3",
     "typescript": "^5.7.2",
-    "@types/node": "^22.10.2"
+    "typescript-eslint": "^8.71.2"
   }
 }

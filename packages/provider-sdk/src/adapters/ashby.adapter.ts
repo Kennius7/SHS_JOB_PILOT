@@ -69,7 +69,7 @@ export class AshbyAdapter implements JobProvider {
     }
   }
 
-  async searchJobs(q: ProviderSearchQuery): Promise<ProviderSearchResult> {
+  async searchJobs(_q: ProviderSearchQuery): Promise<ProviderSearchResult> {
     const res = await fetch(`${this.baseUrl}/posting-api/job-board/${this.org}`);
     if (res.status === 429) throw new ProviderRateLimitError(this.key);
     if (!res.ok) throw new Error(`ASHBY_HTTP_${res.status}`);
@@ -85,9 +85,7 @@ export class AshbyAdapter implements JobProvider {
     const locationName = address?.address ?? address?.city ?? 'Remote';
     const secondary = (raw.secondaryLocations ?? []).filter(Boolean) as AshbyAddress[];
 
-    const allLocations = secondary
-      .map((s) => s?.address ?? s?.city)
-      .filter(Boolean) as string[];
+    const allLocations = secondary.map((s) => s?.address ?? s?.city).filter(Boolean) as string[];
     const locationLabel = [locationName, ...allLocations].join(', ');
 
     return {
@@ -106,7 +104,9 @@ export class AshbyAdapter implements JobProvider {
       applyUrl: raw.applyUrl,
       publishedAt: raw.publishedAt,
       attribution: `${this.org} via Ashby`,
-      usageRestrictions: ['Ashby terms apply; do not automate submission to employers that forbid it.'],
+      usageRestrictions: [
+        'Ashby terms apply; do not automate submission to employers that forbid it.',
+      ],
     };
   }
 

@@ -1,11 +1,6 @@
 import request from 'supertest';
 import { PrismaService, ApplicationsService } from '@shs/data';
-import {
-  createTestApp,
-  TestContext,
-  registerAndLogin,
-  truncateAll,
-} from './helpers';
+import { createTestApp, TestContext, registerAndLogin, truncateAll } from './helpers';
 
 async function seedProviderJob(
   prisma: PrismaService,

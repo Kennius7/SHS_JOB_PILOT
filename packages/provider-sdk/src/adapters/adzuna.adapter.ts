@@ -123,9 +123,7 @@ export class AdzunaAdapter implements JobProvider {
       applyUrl: raw.redirect_url,
       publishedAt: raw.created,
       attribution: 'Jobs by Adzuna',
-      usageRestrictions: [
-        'Attribution required: display "Jobs by Adzuna" badge (min 116x23 px)',
-      ],
+      usageRestrictions: ['Attribution required: display "Jobs by Adzuna" badge (min 116x23 px)'],
     };
   }
 

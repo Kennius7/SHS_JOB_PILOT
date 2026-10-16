@@ -68,7 +68,10 @@ describe('evaluateRule', () => {
   test('empty hard conditions with passing soft conditions yields ELIGIBLE', () => {
     const conditions = RuleConditionsSchema.parse({
       hard: [],
-      soft: { conditions: [{ type: 'WORK_ARRANGEMENT_IN', values: ['REMOTE'] }], minPassRatio: 0.5 },
+      soft: {
+        conditions: [{ type: 'WORK_ARRANGEMENT_IN', values: ['REMOTE'] }],
+        minPassRatio: 0.5,
+      },
     });
     expect(evaluateRule(conditions, ctx()).outcome).toBe('ELIGIBLE');
   });

@@ -1,6 +1,12 @@
 import { EmploymentType, SalaryPeriod, WorkArrangement } from '../types';
 
-const FULL_TIME_TOKENS = ['full time', 'full_time', 'full-time', 'permanent', 'full-time employment'];
+const FULL_TIME_TOKENS = [
+  'full time',
+  'full_time',
+  'full-time',
+  'permanent',
+  'full-time employment',
+];
 const PART_TIME_TOKENS = ['part time', 'part_time', 'part-time'];
 const CONTRACT_TOKENS = ['contract', 'contractor', 'freelance', 'freelancer', 'c2c'];
 const INTERNSHIP_TOKENS = ['internship', 'intern', 'graduate trainee'];
@@ -22,10 +28,7 @@ export function mapEmploymentType(...labels: Array<string | null | undefined>): 
 }
 
 /** Infer the work arrangement from free text; explicit markers win. */
-export function inferWorkArrangement(
-  text: string,
-  explicit?: string | null,
-): WorkArrangement {
+export function inferWorkArrangement(text: string, explicit?: string | null): WorkArrangement {
   const body = `${explicit ?? ''} ${text}`.toLowerCase();
   if (REMOTE_TOKENS.some((t) => body.includes(t))) return 'REMOTE';
   if (HYBRID_TOKENS.some((t) => body.includes(t))) return 'HYBRID';
@@ -49,13 +52,21 @@ export function parseSalaryRange(value?: string | null): ParsedSalaryRange | und
   const currencyMatch = value.match(/[$€£₦฿₹¥A-Za-z\u20A6]{1,3}/);
   const currency = currencyMatch ? normalizeCurrency(currencyMatch[0]) : undefined;
 
-  const numbers = value.match(/\d[\d,.]*/g)?.map((n) => Number(n.replace(/[,\s]/g, ''))).filter(Number.isFinite) ?? [];
+  const numbers =
+    value
+      .match(/\d[\d,.]*/g)
+      ?.map((n) => Number(n.replace(/[,\s]/g, '')))
+      .filter(Number.isFinite) ?? [];
   if (numbers.length === 0) return undefined;
   if (value.toLowerCase().includes('k') && numbers.every((n) => n < 10000)) {
     numbers.forEach((n, i) => (numbers[i] = n * 1000));
   }
 
-  const periodMatch = value.toLowerCase().match(/\/(year|yr|annum|month|mo|hour|day|week)|(per annum|per year|per month|per hour|a year|annual|monthly|hourly)/);
+  const periodMatch = value
+    .toLowerCase()
+    .match(
+      /\/(year|yr|annum|month|mo|hour|day|week)|(per annum|per year|per month|per hour|a year|annual|monthly|hourly)/,
+    );
   const period = periodMatch ? periodFromToken(periodMatch[1] ?? periodMatch[2]) : undefined;
 
   const i = numbers.length > 1 ? numbers[0] : undefined;
@@ -80,7 +91,7 @@ function normalizeCurrency(raw: string): string | undefined {
     GBP: 'GBP',
     KSH: 'KES',
     '₵': 'GHS',
-    'R': 'ZAR',
+    R: 'ZAR',
   };
   return map[raw.toUpperCase()];
 }
@@ -88,7 +99,8 @@ function normalizeCurrency(raw: string): string | undefined {
 export function periodFromToken(token?: string): SalaryPeriod | undefined {
   if (!token) return undefined;
   const t = token.toLowerCase();
-  if (t.startsWith('year') || t.startsWith('yr') || t.startsWith('annum') || t.includes('annual')) return 'YEAR';
+  if (t.startsWith('year') || t.startsWith('yr') || t.startsWith('annum') || t.includes('annual'))
+    return 'YEAR';
   if (t.startsWith('month') || t.startsWith('mo') || t.includes('monthly')) return 'MONTH';
   if (t.startsWith('hour') || t.includes('hourly')) return 'HOUR';
   if (t.startsWith('day')) return 'DAY';

@@ -24,7 +24,10 @@ export class AiService {
   private readonly mock: boolean;
   private readonly model: string;
 
-  constructor(config: ConfigService, private prisma: PrismaService) {
+  constructor(
+    config: ConfigService,
+    private prisma: PrismaService,
+  ) {
     this.model = config.get('AI_MODEL', 'gemini-3.8-flash');
     const apiKey = config.get<string>('AI_API_KEY');
     this.mock = !apiKey || config.get('AI_MOCK_MODE') === 'true';

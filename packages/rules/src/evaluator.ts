@@ -6,7 +6,12 @@ function matchesPattern(value: string, pattern: string, caseSensitive: boolean):
   const p = caseSensitive ? pattern : pattern.toLowerCase();
   if (!p.includes('*')) return v.includes(p);
   const regex = new RegExp(
-    '^' + p.split('*').map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*') + '$',
+    '^' +
+      p
+        .split('*')
+        .map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+        .join('.*') +
+      '$',
   );
   return regex.test(v);
 }
@@ -30,14 +35,22 @@ export function evaluateCondition(condition: ConditionType, ctx: EvalContext): C
   switch (condition.type) {
     case 'TITLE_MATCHES': {
       const title = ctx.job.title;
-      const results = condition.patterns.map((p) => matchesPattern(title, p, condition.caseSensitive));
+      const results = condition.patterns.map((p) =>
+        matchesPattern(title, p, condition.caseSensitive),
+      );
       const pass = condition.mode === 'all' ? results.every(Boolean) : results.some(Boolean);
-      return pass ? { pass: true } : { pass: false, reason: `Title "${title}" does not match required patterns` };
+      return pass
+        ? { pass: true }
+        : { pass: false, reason: `Title "${title}" does not match required patterns` };
     }
     case 'EMPLOYER_NOT_IN': {
       const emp = normalize(ctx.job.employer);
-      const blocked = condition.employers.some((e) => normalize(e) === emp || emp.includes(normalize(e)));
-      return blocked ? { pass: false, reason: `Employer "${ctx.job.employer}" is on the exclusion list` } : { pass: true };
+      const blocked = condition.employers.some(
+        (e) => normalize(e) === emp || emp.includes(normalize(e)),
+      );
+      return blocked
+        ? { pass: false, reason: `Employer "${ctx.job.employer}" is on the exclusion list` }
+        : { pass: true };
     }
     case 'STATE_IN': {
       if (!ctx.job.state) return { pass: false, reason: 'Job has no state information' };
@@ -56,28 +69,41 @@ export function evaluateCondition(condition: ConditionType, ctx: EvalContext): C
     case 'SALARY_MIN_AT_LEAST': {
       const jobSalary = ctx.job.salaryMax ?? ctx.job.salaryMin;
       if (jobSalary == null) {
-        return condition.allowMissing ? { pass: true } : { pass: false, reason: 'Job has no salary information' };
+        return condition.allowMissing
+          ? { pass: true }
+          : { pass: false, reason: 'Job has no salary information' };
       }
       if ((ctx.job.salaryCurrency ?? 'NGN') !== condition.currency) {
         return { pass: false, reason: `Currency mismatch: job is ${ctx.job.salaryCurrency}` };
       }
       return jobSalary >= condition.amount
         ? { pass: true }
-        : { pass: false, reason: `Salary ${jobSalary} ${condition.currency} below floor ${condition.amount}` };
+        : {
+            pass: false,
+            reason: `Salary ${jobSalary} ${condition.currency} below floor ${condition.amount}`,
+          };
     }
     case 'REQUIRED_SKILLS_PRESENT': {
       const overlap = skillOverlap(ctx.profile.skills, condition.skills);
       return overlap >= condition.minMatch
         ? { pass: true }
-        : { pass: false, reason: `Skill overlap ${(overlap * 100).toFixed(0)}% below required ${(condition.minMatch * 100).toFixed(0)}%` };
+        : {
+            pass: false,
+            reason: `Skill overlap ${(overlap * 100).toFixed(0)}% below required ${(condition.minMatch * 100).toFixed(0)}%`,
+          };
     }
     case 'MAX_EXPERIENCE_REQUIRED': {
       if (ctx.job.experienceYears == null) {
-        return condition.allowUnspecified ? { pass: true } : { pass: false, reason: 'Job has no experience requirement specified' };
+        return condition.allowUnspecified
+          ? { pass: true }
+          : { pass: false, reason: 'Job has no experience requirement specified' };
       }
       return ctx.job.experienceYears <= condition.years
         ? { pass: true }
-        : { pass: false, reason: `Job requires ${ctx.job.experienceYears} years, above limit ${condition.years}` };
+        : {
+            pass: false,
+            reason: `Job requires ${ctx.job.experienceYears} years, above limit ${condition.years}`,
+          };
     }
     case 'POSTED_WITHIN_DAYS': {
       if (!ctx.job.publishedAt) return { pass: false, reason: 'Job has no publication date' };
@@ -85,13 +111,19 @@ export function evaluateCondition(condition: ConditionType, ctx: EvalContext): C
       const ageDays = ageMs / 86_400_000;
       return ageDays <= condition.days
         ? { pass: true }
-        : { pass: false, reason: `Posted ${Math.round(ageDays)} days ago, exceeds ${condition.days}` };
+        : {
+            pass: false,
+            reason: `Posted ${Math.round(ageDays)} days ago, exceeds ${condition.days}`,
+          };
     }
     case 'DESCRIPTION_NOT_CONTAINS': {
-      const text = condition.caseSensitive ? ctx.job.description ?? '' : (ctx.job.description ?? '').toLowerCase();
+      const text = condition.caseSensitive
+        ? (ctx.job.description ?? '')
+        : (ctx.job.description ?? '').toLowerCase();
       for (const term of condition.terms) {
         const t = condition.caseSensitive ? term : term.toLowerCase();
-        if (text.includes(t)) return { pass: false, reason: `Description contains forbidden term "${term}"` };
+        if (text.includes(t))
+          return { pass: false, reason: `Description contains forbidden term "${term}"` };
       }
       return { pass: true };
     }

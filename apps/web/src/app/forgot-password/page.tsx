@@ -49,15 +49,29 @@ export default function ForgotPasswordPage() {
                 Enter your email and we&apos;ll send you a link to reset your password.
               </p>
               <div>
-                <label className="label" htmlFor="email">Email</label>
-                <input id="email" type="email" autoComplete="email" {...register('email')} className="input" />
+                <label className="label" htmlFor="email">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  {...register('email')}
+                  className="input"
+                />
               </div>
               {error && <p className="text-sm text-red-600">{error}</p>}
-              <button type="submit" disabled={formState.isSubmitting} className="btn-primary w-full">
+              <button
+                type="submit"
+                disabled={formState.isSubmitting}
+                className="btn-primary w-full"
+              >
                 {formState.isSubmitting ? 'Sending…' : 'Send reset link'}
               </button>
               <p className="text-center text-sm text-slate-600">
-                <Link href="/login" className="text-brand-600 hover:underline">Back to sign in</Link>
+                <Link href="/login" className="text-brand-600 hover:underline">
+                  Back to sign in
+                </Link>
               </p>
             </>
           )}

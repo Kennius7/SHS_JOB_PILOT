@@ -31,7 +31,10 @@ export default function DocumentsPage() {
       fd.append('file', file);
       return api.upload<Doc>('/v1/documents', fd);
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['documents'] }); setError(null); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['documents'] });
+      setError(null);
+    },
     onError: (e) => setError(e instanceof ApiError ? e.message : 'Upload failed'),
   });
 
@@ -85,7 +88,11 @@ export default function DocumentsPage() {
                 e.target.value = '';
               }}
             />
-            <button className="btn-primary" onClick={() => fileRef.current?.click()} disabled={upload.isPending}>
+            <button
+              className="btn-primary"
+              onClick={() => fileRef.current?.click()}
+              disabled={upload.isPending}
+            >
               <Upload className="h-4 w-4" />
               {upload.isPending ? 'Uploading…' : 'Upload'}
             </button>
@@ -127,7 +134,10 @@ export default function DocumentsPage() {
                     >
                       ⬇
                     </button>
-                    <button onClick={() => remove.mutate(d.id)} className="inline-flex rounded p-2 text-red-500 hover:bg-red-50">
+                    <button
+                      onClick={() => remove.mutate(d.id)}
+                      className="inline-flex rounded p-2 text-red-500 hover:bg-red-50"
+                    >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </td>

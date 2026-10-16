@@ -1,10 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  ApplicationState,
-  assertCanTransition,
-  IllegalStateTransitionError,
-} from '@shs/shared';
+import { ApplicationState, assertCanTransition, IllegalStateTransitionError } from '@shs/shared';
 
 interface TransitionOptions {
   note?: string;
@@ -34,11 +30,7 @@ export class TransitionsService {
    * Atomic transition + status event + optional notification.
    * Uses SELECT ... FOR UPDATE so concurrent workers cannot race.
    */
-  async transition(
-    applicationId: string,
-    to: ApplicationState,
-    opts: TransitionOptions = {},
-  ) {
+  async transition(applicationId: string, to: ApplicationState, opts: TransitionOptions = {}) {
     return this.prisma.$transaction(async (tx) => {
       const [app] = await tx.$queryRaw<
         { id: string; state: ApplicationState; userId: string }[]

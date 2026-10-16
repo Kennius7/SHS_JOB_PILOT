@@ -38,8 +38,12 @@ export class ApplicationsService {
       include: {
         job: {
           select: {
-            id: true, title: true, employer: true, applyUrl: true,
-            sourceUrl: true, providerKey: true,
+            id: true,
+            title: true,
+            employer: true,
+            applyUrl: true,
+            sourceUrl: true,
+            providerKey: true,
           },
         },
       },

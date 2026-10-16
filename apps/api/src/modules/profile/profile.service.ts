@@ -1,8 +1,12 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@shs/data';
 import {
-  ProfilePatchDto, PreferencePatchDto, SkillInputDto,
-  ExperienceInputDto, EducationInputDto, ApplyParsedDto,
+  ProfilePatchDto,
+  PreferencePatchDto,
+  SkillInputDto,
+  ExperienceInputDto,
+  EducationInputDto,
+  ApplyParsedDto,
 } from './dto';
 
 @Injectable()
@@ -252,7 +256,8 @@ export class ProfileService {
     });
     if (!profile) throw new BadRequestException('Profile not created');
     if (!profile.fullName) throw new BadRequestException('Full name is required');
-    if (!profile.targetRoles?.length) throw new BadRequestException('At least one target role is required');
+    if (!profile.targetRoles?.length)
+      throw new BadRequestException('At least one target role is required');
     if (!profile.skills?.length) throw new BadRequestException('At least one skill is required');
     if (!profile.preferences) throw new BadRequestException('Preferences are required');
 

@@ -42,7 +42,9 @@ export default function ApplicationsPage() {
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`-mb-px border-b-2 px-4 py-2 text-sm ${
-              tab === t.key ? 'border-brand-500 font-medium text-brand-700' : 'border-transparent text-slate-600 hover:text-slate-900'
+              tab === t.key
+                ? 'border-brand-500 font-medium text-brand-700'
+                : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
             {t.label}
@@ -63,12 +65,17 @@ export default function ApplicationsPage() {
             <li key={app.id} className="card">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <Link href={`/applications/${app.id}`} className="font-semibold hover:text-brand-600">
+                  <Link
+                    href={`/applications/${app.id}`}
+                    className="font-semibold hover:text-brand-600"
+                  >
                     {app.job.title}
                   </Link>
                   <p className="text-sm text-slate-600">{app.job.employer}</p>
                   {app.matchScore != null && (
-                    <p className="mt-1 text-xs text-slate-500">Match score: {Math.round(app.matchScore)}</p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Match score: {Math.round(app.matchScore)}
+                    </p>
                   )}
                   {app.lastError && (
                     <p className="mt-2 flex items-center gap-1 text-xs text-red-600">
@@ -88,7 +95,12 @@ export default function ApplicationsPage() {
                     </>
                   )}
                   {app.state === 'MANUAL_APPLICATION_REQUIRED' && app.job.applyUrl && (
-                    <a href={app.job.applyUrl} target="_blank" rel="noopener noreferrer" className="btn-primary">
+                    <a
+                      href={app.job.applyUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-primary"
+                    >
                       <ExternalLink className="h-4 w-4" /> Apply on site
                     </a>
                   )}

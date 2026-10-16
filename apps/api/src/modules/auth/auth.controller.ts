@@ -13,13 +13,7 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { CookieOptions, Response, Request } from 'express';
 import { AuthService } from './auth.service';
-import {
-  RegisterDto,
-  LoginDto,
-  VerifyEmailDto,
-  ForgotPasswordDto,
-  ResetPasswordDto,
-} from './dto';
+import { RegisterDto, LoginDto, VerifyEmailDto, ForgotPasswordDto, ResetPasswordDto } from './dto';
 
 @ApiTags('auth')
 @Controller({ path: 'auth', version: '1' })
@@ -31,9 +25,10 @@ export class AuthController {
 
   private refreshCookieOptions(): CookieOptions {
     const configured = this.config.get<string>('COOKIE_SECURE');
-    const secure = configured === undefined || configured === ''
-      ? process.env.NODE_ENV === 'production'
-      : configured === 'true' || configured === '1';
+    const secure =
+      configured === undefined || configured === ''
+        ? process.env.NODE_ENV === 'production'
+        : configured === 'true' || configured === '1';
     return {
       httpOnly: true,
       sameSite: 'lax',
@@ -50,7 +45,11 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(200)
-  async login(@Body() dto: LoginDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async login(
+    @Body() dto: LoginDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const result = await this.auth.login(
       dto.email,
       dto.password,

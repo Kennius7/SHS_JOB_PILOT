@@ -13,7 +13,9 @@ export class VerificationProcessor extends WorkerHost {
     private prisma: PrismaService,
     private transitions: TransitionsService,
     private providers: ProvidersService,
-  ) { super(); }
+  ) {
+    super();
+  }
 
   async process(job: Job<{ applicationId: string }>) {
     const { applicationId } = job.data;

@@ -1,9 +1,5 @@
 export type ProviderAccessMode =
-  | 'PUBLIC_API'
-  | 'AUTHORIZED_API'
-  | 'APPROVED_FEED'
-  | 'PERMITTED_BROWSER'
-  | 'MANUAL_LINK_ONLY';
+  'PUBLIC_API' | 'AUTHORIZED_API' | 'APPROVED_FEED' | 'PERMITTED_BROWSER' | 'MANUAL_LINK_ONLY';
 
 export interface ProviderCapabilities {
   searchJobs: boolean;
@@ -27,8 +23,7 @@ export interface ProviderStatus {
 
 export type WorkArrangement = 'REMOTE' | 'HYBRID' | 'ONSITE' | 'UNKNOWN';
 export type EmploymentType =
-  | 'FULL_TIME' | 'PART_TIME' | 'CONTRACT'
-  | 'INTERNSHIP' | 'TEMPORARY' | 'UNKNOWN';
+  'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'INTERNSHIP' | 'TEMPORARY' | 'UNKNOWN';
 export type SalaryPeriod = 'YEAR' | 'MONTH' | 'DAY' | 'HOUR';
 
 export interface NormalizedJob {
@@ -125,7 +120,10 @@ export class ProviderRateLimitError extends Error {
 }
 
 export class ProviderAuthError extends Error {
-  constructor(public providerKey: string, message = 'Provider authentication failed') {
+  constructor(
+    public providerKey: string,
+    message = 'Provider authentication failed',
+  ) {
     super(message);
   }
 }

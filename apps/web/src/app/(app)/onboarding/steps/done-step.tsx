@@ -12,7 +12,8 @@ export function DoneStep() {
   const [saving, setSaving] = useState(false);
 
   async function finish() {
-    setSaving(true); setError(null);
+    setSaving(true);
+    setError(null);
     try {
       await api.post('/v1/profile/complete-onboarding');
       await qc.invalidateQueries({ queryKey: ['profile'] });
@@ -29,7 +30,9 @@ export function DoneStep() {
         <CheckCircle2 className="h-8 w-8 text-green-600" />
       </div>
       <h1 className="text-2xl font-semibold">You're set up</h1>
-      <p className="mt-2 text-sm text-slate-600">From now on, we'll match new jobs against your profile and rules.</p>
+      <p className="mt-2 text-sm text-slate-600">
+        From now on, we'll match new jobs against your profile and rules.
+      </p>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <button onClick={finish} disabled={saving} className="btn-primary mx-auto">
         <Briefcase className="h-4 w-4" /> {saving ? 'Finishing…' : 'Go to dashboard'}

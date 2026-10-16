@@ -86,7 +86,9 @@ export class RemotiveAdapter implements JobProvider {
       employer: raw.company_name ?? 'Unknown',
       description: raw.description,
       location: this.parseLocation(location),
-      workArrangement: /worldwide|remote/i.test(location) ? 'REMOTE' : inferWorkArrangement(location),
+      workArrangement: /worldwide|remote/i.test(location)
+        ? 'REMOTE'
+        : inferWorkArrangement(location),
       employmentType: mapEmploymentType(raw.job_type),
       salary,
       skills: raw.tags,

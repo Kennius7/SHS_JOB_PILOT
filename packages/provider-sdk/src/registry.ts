@@ -138,11 +138,7 @@ export function buildRegistry(env: RegistryEnv, nodeEnv = 'development'): Provid
 
   if (env.adzunaAppId && env.adzunaAppKey) {
     registry.register(
-      new AdzunaAdapter(
-        env.adzunaAppId,
-        env.adzunaAppKey,
-        env.adzunaCountry ?? 'ng',
-      ),
+      new AdzunaAdapter(env.adzunaAppId, env.adzunaAppKey, env.adzunaCountry ?? 'ng'),
     );
   }
 

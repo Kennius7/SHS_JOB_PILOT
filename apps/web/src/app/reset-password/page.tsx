@@ -59,20 +59,34 @@ export default function ResetPasswordPage() {
             <>
               <div>
                 <label className="label">New password</label>
-                <input type="password" autoComplete="new-password" {...register('password')} className="input" />
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  {...register('password')}
+                  className="input"
+                />
                 {formState.errors.password && (
                   <p className="mt-1 text-xs text-red-600">{formState.errors.password.message}</p>
                 )}
               </div>
               <div>
                 <label className="label">Confirm new password</label>
-                <input type="password" autoComplete="new-password" {...register('confirm')} className="input" />
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  {...register('confirm')}
+                  className="input"
+                />
                 {formState.errors.confirm && (
                   <p className="mt-1 text-xs text-red-600">{formState.errors.confirm.message}</p>
                 )}
               </div>
               {error && <p className="text-sm text-red-600">{error}</p>}
-              <button type="submit" disabled={formState.isSubmitting} className="btn-primary w-full">
+              <button
+                type="submit"
+                disabled={formState.isSubmitting}
+                className="btn-primary w-full"
+              >
                 {formState.isSubmitting ? 'Resetting…' : 'Reset password'}
               </button>
             </>

@@ -5,16 +5,6 @@ import Link from 'next/link';
 import { Briefcase, ListChecks, CheckCircle2, AlertCircle, FileText } from 'lucide-react';
 import { api } from '@/lib/api';
 
-interface Summary {
-  discoveredJobs: number;
-  newMatches: number;
-  awaitingApproval: number;
-  submitted: number;
-  confirmed: number;
-  failed: number;
-  needsInput: number;
-}
-
 export default function DashboardPage() {
   const { data: apps } = useQuery({
     queryKey: ['applications', 'summary'],
@@ -28,7 +18,12 @@ export default function DashboardPage() {
 
   const cards = [
     { key: 'MATCHED', label: 'Matched', icon: Briefcase, tone: 'text-brand-600' },
-    { key: 'AWAITING_APPROVAL', label: 'Awaiting approval', icon: AlertCircle, tone: 'text-amber-600' },
+    {
+      key: 'AWAITING_APPROVAL',
+      label: 'Awaiting approval',
+      icon: AlertCircle,
+      tone: 'text-amber-600',
+    },
     { key: 'SUBMITTED', label: 'Submitted', icon: ListChecks, tone: 'text-slate-600' },
     { key: 'CONFIRMED', label: 'Confirmed', icon: CheckCircle2, tone: 'text-green-600' },
     { key: 'FAILED', label: 'Failed', icon: AlertCircle, tone: 'text-red-600' },
@@ -38,9 +33,15 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap gap-3">
-        <Link href="/jobs" className="btn-primary">Browse jobs</Link>
-        <Link href="/rules" className="btn-secondary">Edit rules</Link>
-        <Link href="/documents" className="btn-secondary">Upload CV</Link>
+        <Link href="/jobs" className="btn-primary">
+          Browse jobs
+        </Link>
+        <Link href="/rules" className="btn-secondary">
+          Edit rules
+        </Link>
+        <Link href="/documents" className="btn-secondary">
+          Upload CV
+        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">

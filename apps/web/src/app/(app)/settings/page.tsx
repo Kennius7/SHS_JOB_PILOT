@@ -45,7 +45,10 @@ export default function SettingsPage() {
     queryKey: ['automation'],
     queryFn: () => api.get<AutomationStatus>('/v1/automation/status'),
   });
-  const usage = useQuery({ queryKey: ['usage'], queryFn: () => api.get<UsageResponse>('/v1/usage') });
+  const usage = useQuery({
+    queryKey: ['usage'],
+    queryFn: () => api.get<UsageResponse>('/v1/usage'),
+  });
 
   const pause = useMutation({
     mutationFn: () => api.post('/v1/automation/pause'),
@@ -80,10 +83,22 @@ export default function SettingsPage() {
           <p className="text-sm text-slate-500">Loading…</p>
         ) : (
           <dl className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
-            <div><dt className="text-slate-500">Email</dt><dd>{me.data?.email}</dd></div>
-            <div><dt className="text-slate-500">Role</dt><dd>{me.data?.role}</dd></div>
-            <div><dt className="text-slate-500">Name</dt><dd>{me.data?.profile?.fullName ?? '—'}</dd></div>
-            <div><dt className="text-slate-500">Email verified</dt><dd>{me.data?.emailVerified ? 'Yes' : 'No'}</dd></div>
+            <div>
+              <dt className="text-slate-500">Email</dt>
+              <dd>{me.data?.email}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Role</dt>
+              <dd>{me.data?.role}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Name</dt>
+              <dd>{me.data?.profile?.fullName ?? '—'}</dd>
+            </div>
+            <div>
+              <dt className="text-slate-500">Email verified</dt>
+              <dd>{me.data?.emailVerified ? 'Yes' : 'No'}</dd>
+            </div>
           </dl>
         )}
         {!me.isLoading && !me.data?.emailVerified && (
@@ -92,9 +107,7 @@ export default function SettingsPage() {
               <p className="text-sm text-green-700">Verification email sent. Check your inbox.</p>
             ) : (
               <>
-                <p className="mb-2 text-sm text-amber-600">
-                  Your email is not verified yet.
-                </p>
+                <p className="mb-2 text-sm text-amber-600">Your email is not verified yet.</p>
                 <button
                   onClick={() => resendVerification.mutate()}
                   className="btn-secondary"
@@ -134,12 +147,16 @@ export default function SettingsPage() {
                   </span>
                 </p>
                 <p className="text-xs text-slate-500">
-                  Min match score {auto?.minMatchScore} · {auto?.usage?.submittedToday} submitted today ·{' '}
-                  {auto?.usage?.awaitingApproval} awaiting approval
+                  Min match score {auto?.minMatchScore} · {auto?.usage?.submittedToday} submitted
+                  today · {auto?.usage?.awaitingApproval} awaiting approval
                 </p>
               </div>
               {auto?.autoSubmitEnabled ? (
-                <button onClick={() => pause.mutate()} className="btn-secondary" disabled={pause.isPending}>
+                <button
+                  onClick={() => pause.mutate()}
+                  className="btn-secondary"
+                  disabled={pause.isPending}
+                >
                   <Pause className="h-4 w-4" /> Pause
                 </button>
               ) : (
@@ -154,14 +171,16 @@ export default function SettingsPage() {
               )}
             </div>
             {!auto?.hasActiveRule && (
-              <p className="text-xs text-amber-600">You need an active application rule to enable automation.</p>
+              <p className="text-xs text-amber-600">
+                You need an active application rule to enable automation.
+              </p>
             )}
             {resume.isError && (
               <p className="mt-2 text-xs text-red-600">{(resume.error as Error).message}</p>
             )}
             <p className="mt-3 text-xs text-slate-500">
-              Limits: {(auto?.limits?.maxApplicationsPerDay ?? 0)}/day ·{' '}
-              {(auto?.limits?.maxApplicationsPerWeek ?? 0)}/week
+              Limits: {auto?.limits?.maxApplicationsPerDay ?? 0}/day ·{' '}
+              {auto?.limits?.maxApplicationsPerWeek ?? 0}/week
             </p>
           </>
         )}
@@ -186,7 +205,9 @@ export default function SettingsPage() {
               <tr>
                 <td className="pt-2 font-medium">Total</td>
                 <td />
-                <td className="pt-2 text-right font-medium">${(usage.data.totalAmount ?? 0).toFixed(4)}</td>
+                <td className="pt-2 text-right font-medium">
+                  ${(usage.data.totalAmount ?? 0).toFixed(4)}
+                </td>
               </tr>
             </tbody>
           </table>
