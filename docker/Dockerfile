@@ -1,6 +1,12 @@
 FROM node:22-bookworm-slim AS builder
 WORKDIR /app
 
+# Prisma needs openssl present to detect the correct libssl flavour; without it
+# it emits a warning and falls back to openssl-1.1.x.
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends openssl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY . .
 RUN npm ci
 RUN DATABASE_URL="postgresql://jobpilot:buildplaceholder@localhost:5432/jobpilot" npx prisma generate --schema=prisma/schema.prisma
