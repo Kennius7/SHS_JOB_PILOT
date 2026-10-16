@@ -8,9 +8,10 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { Response, Request } from 'express';
+import { CookieOptions, Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import {
   RegisterDto,
@@ -23,7 +24,24 @@ import {
 @ApiTags('auth')
 @Controller({ path: 'auth', version: '1' })
 export class AuthController {
-  constructor(private auth: AuthService) {}
+  constructor(
+    private auth: AuthService,
+    private config: ConfigService,
+  ) {}
+
+  private refreshCookieOptions(): CookieOptions {
+    const configured = this.config.get<string>('COOKIE_SECURE');
+    const secure = configured === undefined || configured === ''
+      ? process.env.NODE_ENV === 'production'
+      : configured === 'true' || configured === '1';
+    return {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure,
+      maxAge: Number(this.config.get('REFRESH_TOKEN_TTL_DAYS', 30)) * 86400_000,
+      path: '/api/v1/auth',
+    };
+  }
 
   @Post('register')
   async register(@Body() dto: RegisterDto) {
@@ -39,13 +57,7 @@ export class AuthController {
       req.headers['user-agent'],
       req.ip,
     );
-    res.cookie('refreshToken', result.refreshToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: Number(process.env.REFRESH_TOKEN_TTL_DAYS ?? 30) * 86400_000,
-      path: '/api/v1/auth',
-    });
+    res.cookie('refreshToken', result.refreshToken, this.refreshCookieOptions());
     return { accessToken: result.accessToken, user: result.user };
   }
 
@@ -55,13 +67,7 @@ export class AuthController {
     const token = (req as any).cookies?.refreshToken;
     if (!token) throw new UnauthorizedException('No refresh token');
     const result = await this.auth.refresh(token);
-    res.cookie('refreshToken', result.refreshToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: Number(process.env.REFRESH_TOKEN_TTL_DAYS ?? 30) * 86400_000,
-      path: '/api/v1/auth',
-    });
+    res.cookie('refreshToken', result.refreshToken, this.refreshCookieOptions());
     return { accessToken: result.accessToken };
   }
 

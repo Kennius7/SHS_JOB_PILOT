@@ -97,6 +97,25 @@ describe('Auth & email flows (integration)', () => {
     await login(ctx, 'reset@test.dev', 'NewPassword123!').expect(200);
   });
 
+  it('issues an httpOnly refresh cookie that can refresh the session', async () => {
+    await register(ctx, 'session@test.dev').expect(201);
+    const loginRes = await login(ctx, 'session@test.dev').expect(200);
+
+    const setCookie = loginRes.headers['set-cookie'] as unknown as string[];
+    const refreshCookie = setCookie.find((c) => c.startsWith('refreshToken='));
+    expect(refreshCookie).toBeDefined();
+    expect(refreshCookie).toMatch(/HttpOnly/i);
+    expect(refreshCookie).toMatch(/SameSite=Lax/i);
+    expect(refreshCookie).not.toMatch(/;\s*Secure/i);
+
+    const issued = refreshCookie!.split(';')[0];
+    const refreshed = await request(ctx.server)
+      .post('/api/v1/auth/refresh')
+      .set('Cookie', issued)
+      .expect(200);
+    expect(typeof refreshed.body.accessToken).toBe('string');
+  });
+
   it('does not reveal whether an account exists on forgot-password', async () => {
     await request(ctx.server)
       .post('/api/v1/auth/forgot-password')

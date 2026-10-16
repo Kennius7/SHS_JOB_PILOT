@@ -165,7 +165,8 @@ See `.env.example` for the full list. Key variables:
 - **Database:** `DATABASE_URL`
 - **Redis:** `REDIS_URL`
 - **Auth:** `JWT_SECRET`, `SESSION_SECRET`, `JWT_ACCESS_TTL`,
-  `REFRESH_TOKEN_TTL_DAYS`
+  `REFRESH_TOKEN_TTL_DAYS`, `COOKIE_SECURE` (defaults to `NODE_ENV === "production"`;
+  set `false` when serving over plain HTTP)
 - **AI:** `AI_PROVIDER`, `AI_API_KEY`, `AI_MODEL`, `AI_MOCK_MODE`,
   `AI_MONTHLY_BUDGET_USD`, `AI_PER_USER_MONTHLY_BUDGET_USD`
 - **Documents:** `DOCUMENT_STORAGE_PATH`, `MAX_UPLOAD_SIZE_MB`
