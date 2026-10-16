@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+#
+# LEGACY / DO NOT USE — kept for historical reference only. This one-shot
+# scaffolding script predates the current project layout (pnpm workspaces + the
+# old Turbo "pipeline" key) and omits later slices (e.g. the email/auth flows).
+# It is NOT part of the build, CI, or deployment; the repository is the source
+# of truth.
 # SHS Job Pilot — Part 4: worker, web, scripts, README
 set -euo pipefail
 

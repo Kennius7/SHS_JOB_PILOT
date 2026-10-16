@@ -188,8 +188,10 @@ migrations were not applied and the API/worker were not booted end-to-end.
 
 Verification: `npm run typecheck` ✅ (13/13) · `npm run build` ✅ (8/8) · `npm run test` ✅.
 
-Note: `extras/bootstrap-part4.sh` / `bootstrap-part5.sh` are legacy one-shot scaffolding scripts and
-still describe the old `adzuna-sync` worker; they are not run as part of the build.
+Note: the `extras/bootstrap-part*.sh` (and `shfix.sh` / `someshell.sh`) scripts are legacy one-shot
+scaffolding — they use pnpm workspaces and the old Turbo `pipeline` key and predate the email/auth
+slices. They are banner-marked "LEGACY / DO NOT USE" and are not run as part of the build, CI, or
+deployment; the repository itself is the source of truth.
 
 ### Admin dashboard UI slice (implemented)
 
