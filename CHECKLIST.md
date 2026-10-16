@@ -107,9 +107,9 @@ Last audit: repository baseline after monorepo scaffold (commit `3c4237a`).
       private network, healthchecks.
 - [x] Dockerfile (multi-stage `docker/Dockerfile` with `api`/`worker`/`web` targets) — non-root
       hardening still to add.
-- [~] Oracle VM deployment scripts + reverse proxy integration — VM and its prod stack identified;
-  deployment runbook/scripts still to be written.
-- [ ] Backup/restore + rollback documentation.
+- [x] Oracle VM deployment + reverse proxy integration — stack runs on the VM behind the shared
+      Caddy ingress (HTTPS via Let's Encrypt); runbook in `DEPLOY.md`.
+- [x] Backup/restore + rollback documentation — see `DEPLOY.md` sections 9–10.
 - [ ] Observability: correlation IDs, queue-depth metrics, structured logs.
 
 ---

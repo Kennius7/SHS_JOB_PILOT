@@ -208,6 +208,8 @@ See `.env.example` for the full list. Key variables:
   `postgres`, and `redis` on a private network with healthchecks. The `web`
   container also joins the shared Caddy ingress network
   (`shs_ai_service_shs-network`) so Caddy can serve it over HTTPS.
+- **Runbook** (`DEPLOY.md`): VM topology, DNS, `.env`, the Caddy ingress and its
+  bind-mount gotcha, migrations, backups/restore, and rollback.
 
 ## Design notes
 
