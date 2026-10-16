@@ -12,7 +12,7 @@ import { DoneStep } from './steps/done-step';
 
 export default function OnboardingPage() {
   const { step, isLoading } = useOnboarding();
-  if (isLoading) return <div className="text-center text-sm text-slate-500">Loading…</div>;
+  if (isLoading) return <div className="text-center text-sm text-muted-foreground">Loading…</div>;
   switch (step) {
     case 'welcome':
       return <WelcomeStep />;

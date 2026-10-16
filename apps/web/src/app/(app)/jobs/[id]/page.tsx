@@ -9,13 +9,13 @@ export default function JobDetailPage() {
     queryKey: ['job', id],
     queryFn: () => api.get<any>(`/v1/jobs/${id}`),
   });
-  if (isLoading) return <div className="card text-sm text-slate-500">Loading…</div>;
-  if (!job) return <div className="card text-sm text-slate-500">Not found.</div>;
+  if (isLoading) return <div className="card text-sm text-muted-foreground">Loading…</div>;
+  if (!job) return <div className="card text-sm text-muted-foreground">Not found.</div>;
   return (
     <div className="space-y-6">
       <div className="card">
         <h1 className="text-xl font-semibold">{job.title}</h1>
-        <p className="text-sm text-slate-600">{job.employer}</p>
+        <p className="text-sm text-muted-foreground">{job.employer}</p>
         {job.attribution && <p className="mt-2 text-xs text-brand-700">{job.attribution}</p>}
         {job.applyUrl && (
           <a
@@ -30,7 +30,7 @@ export default function JobDetailPage() {
       </div>
       <div className="card">
         <h2 className="font-semibold">Description</h2>
-        <pre className="mt-3 whitespace-pre-wrap text-sm text-slate-700">{job.description}</pre>
+        <pre className="mt-3 whitespace-pre-wrap text-sm text-foreground">{job.description}</pre>
       </div>
     </div>
   );

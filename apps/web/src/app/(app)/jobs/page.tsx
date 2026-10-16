@@ -47,7 +47,7 @@ export default function JobsPage() {
     <div className="space-y-4">
       <div className="card flex flex-col gap-3 md:flex-row md:items-center">
         <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <input
             value={q}
             onChange={(e) => {
@@ -74,9 +74,9 @@ export default function JobsPage() {
       </div>
 
       {isLoading ? (
-        <div className="card text-sm text-slate-500">Loading jobs…</div>
+        <div className="card text-sm text-muted-foreground">Loading jobs…</div>
       ) : !data?.items?.length ? (
-        <div className="card text-center text-sm text-slate-500">
+        <div className="card text-center text-sm text-muted-foreground">
           No jobs match those filters yet. Try widening your search, or wait for the next provider
           sync.
         </div>
@@ -85,10 +85,10 @@ export default function JobsPage() {
           {data.items.map((job) => (
             <li key={job.id} className="card">
               <Link href={`/jobs/${job.id}`} className="block">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
-                    <h3 className="truncate font-semibold text-slate-900">{job.title}</h3>
-                    <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                    <h3 className="truncate font-semibold text-foreground">{job.title}</h3>
+                    <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Building2 className="h-3.5 w-3.5" />
                         {job.employer}
@@ -101,12 +101,10 @@ export default function JobsPage() {
                       )}
                     </div>
                     <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                      <span className="rounded bg-slate-100 px-2 py-0.5">
-                        {job.workArrangement}
-                      </span>
-                      <span className="rounded bg-slate-100 px-2 py-0.5">{job.employmentType}</span>
+                      <span className="rounded bg-muted px-2 py-0.5">{job.workArrangement}</span>
+                      <span className="rounded bg-muted px-2 py-0.5">{job.employmentType}</span>
                       {job.salaryMin != null && (
-                        <span className="rounded bg-green-50 px-2 py-0.5 text-green-700">
+                        <span className="rounded bg-green-50 dark:bg-green-500/10 px-2 py-0.5 text-green-700 dark:text-green-400">
                           {job.salaryCurrency ?? 'NGN'} {job.salaryMin.toLocaleString()}
                           {job.salaryMax != null && ` – ${job.salaryMax.toLocaleString()}`}
                         </span>

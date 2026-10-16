@@ -45,7 +45,7 @@ export function RulesStep() {
           <ShieldAlert className="h-5 w-5 text-brand-600" />
           <h1 className="text-2xl font-semibold">Your first rule</h1>
         </div>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-muted-foreground">
           Hard rules reject outright. Soft rules contribute to a match ratio. Refine later.
         </p>
       </header>

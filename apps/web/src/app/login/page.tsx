@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { useAuth } from '@/lib/auth-context';
 import { ApiError } from '@/lib/api';
 import { PasswordInput } from '@/components/password-input';
+import { ThemeToggle } from '@/components/theme-toggle';
 import Image from 'next/image';
 import logo from '../../../public/img/SHS_Job_Pilot_Logo1.png';
 
@@ -34,7 +35,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-10">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-sm">
         <div className="mb-8 flex items-center justify-center gap-2">
           {/* <Briefcase className="h-6 w-6 text-brand-600" /> */}
@@ -65,7 +69,7 @@ export default function LoginPage() {
               {...register('password')}
             />
           </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
           <button type="submit" disabled={formState.isSubmitting} className="btn-primary w-full">
             {formState.isSubmitting ? 'Signing in…' : 'Sign in'}
           </button>
@@ -74,7 +78,7 @@ export default function LoginPage() {
               Forgot password?
             </Link>
           </p>
-          <p className="text-center text-sm text-slate-600">
+          <p className="text-center text-sm text-muted-foreground">
             No account?{' '}
             <Link href="/register" className="text-brand-600 hover:underline">
               Create one

@@ -30,19 +30,19 @@ function Progress() {
                   ? 'bg-brand-600 text-white'
                   : active
                     ? 'bg-brand-100 text-brand-700 ring-2 ring-brand-500'
-                    : 'bg-slate-100 text-slate-500'
+                    : 'bg-muted text-muted-foreground'
               }`}
             >
               {done ? <Check className="h-4 w-4" /> : i + 1}
             </div>
             <span
-              className={`ml-2 hidden text-xs md:inline ${active ? 'font-medium text-slate-900' : 'text-slate-500'}`}
+              className={`ml-2 hidden text-xs md:inline ${active ? 'font-medium text-foreground' : 'text-muted-foreground'}`}
             >
               {LABELS[s]}
             </span>
             {i < visible.length - 1 && (
               <div
-                className={`mx-3 hidden flex-1 border-t md:block ${done ? 'border-brand-500' : 'border-slate-200'}`}
+                className={`mx-3 hidden flex-1 border-t md:block ${done ? 'border-brand-500' : 'border-border'}`}
               />
             )}
           </li>

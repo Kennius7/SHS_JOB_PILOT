@@ -42,7 +42,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-lg font-semibold">Notifications</h1>
         {(data?.unreadCount ?? 0) > 0 && (
           <button onClick={() => markAllRead.mutate()} className="btn-secondary">
@@ -52,10 +52,10 @@ export default function NotificationsPage() {
       </div>
 
       {isLoading ? (
-        <div className="card text-sm text-slate-500">Loading…</div>
+        <div className="card text-sm text-muted-foreground">Loading…</div>
       ) : !data?.items?.length ? (
-        <div className="card text-center text-sm text-slate-500">
-          <Inbox className="mx-auto mb-3 h-8 w-8 text-slate-300" />
+        <div className="card text-center text-sm text-muted-foreground">
+          <Inbox className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
           You have no notifications yet.
         </div>
       ) : (
@@ -66,12 +66,12 @@ export default function NotificationsPage() {
               className={`card flex items-start gap-3 ${n.readAt ? '' : 'border-l-4 border-l-brand-500'}`}
             >
               <Bell
-                className={`mt-0.5 h-4 w-4 shrink-0 ${n.readAt ? 'text-slate-300' : 'text-brand-500'}`}
+                className={`mt-0.5 h-4 w-4 shrink-0 ${n.readAt ? 'text-muted-foreground' : 'text-brand-500'}`}
               />
               <div className="min-w-0 flex-1">
-                <p className="font-medium text-slate-900">{n.title}</p>
-                <p className="text-sm text-slate-600">{n.body}</p>
-                <p className="mt-1 text-xs text-slate-400">
+                <p className="font-medium text-foreground">{n.title}</p>
+                <p className="text-sm text-muted-foreground">{n.body}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
                   {new Date(n.createdAt).toLocaleString()}
                 </p>
               </div>

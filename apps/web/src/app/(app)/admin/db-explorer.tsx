@@ -30,10 +30,10 @@ const PAGE_SIZE = 50;
 
 function Cell({ value }: { value: unknown }) {
   if (value === null || value === undefined) {
-    return <span className="text-slate-300">NULL</span>;
+    return <span className="text-muted-foreground">NULL</span>;
   }
   if (typeof value === 'object') {
-    return <code className="text-xs text-slate-600">{JSON.stringify(value)}</code>;
+    return <code className="text-xs text-muted-foreground">{JSON.stringify(value)}</code>;
   }
   const text = String(value);
   return (
@@ -95,8 +95,8 @@ export function DbExplorer() {
 
   return (
     <section className="card">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2 font-medium text-slate-900">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2 font-medium text-foreground">
           <Database className="h-4 w-4" /> Database (PostgreSQL)
         </div>
         <button onClick={() => tables.refetch()} className="btn-secondary">
@@ -105,26 +105,26 @@ export function DbExplorer() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
-        <div className="max-h-[420px] overflow-y-auto rounded-lg border border-slate-200">
+        <div className="max-h-[420px] overflow-y-auto rounded-lg border border-border">
           {tables.isLoading ? (
-            <p className="p-3 text-sm text-slate-500">Loading…</p>
+            <p className="p-3 text-sm text-muted-foreground">Loading…</p>
           ) : !tables.data?.tables?.length ? (
-            <p className="p-3 text-sm text-slate-500">No tables found.</p>
+            <p className="p-3 text-sm text-muted-foreground">No tables found.</p>
           ) : (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-border">
               {tables.data.tables.map((t) => (
                 <li key={t.name}>
                   <button
                     onClick={() => selectTable(t.name)}
-                    className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-slate-50 ${
-                      table === t.name ? 'bg-brand-50 text-brand-700' : 'text-slate-700'
+                    className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-muted ${
+                      table === t.name ? 'bg-brand-50 text-brand-700' : 'text-foreground'
                     }`}
                   >
                     <span className="flex items-center gap-2 truncate">
-                      <Table2 className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                      <Table2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                       <span className="truncate">{t.name}</span>
                     </span>
-                    <span className="shrink-0 text-xs text-slate-400">{t.rows}</span>
+                    <span className="shrink-0 text-xs text-muted-foreground">{t.rows}</span>
                   </button>
                 </li>
               ))}
@@ -134,7 +134,7 @@ export function DbExplorer() {
 
         <div className="min-w-0">
           {!table ? (
-            <p className="text-sm text-slate-500">Select a table to browse its rows.</p>
+            <p className="text-sm text-muted-foreground">Select a table to browse its rows.</p>
           ) : (
             <>
               <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -147,7 +147,7 @@ export function DbExplorer() {
                   className="flex items-center gap-2"
                 >
                   <div className="relative">
-                    <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                    <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                     <input
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
@@ -166,37 +166,41 @@ export function DbExplorer() {
                         setSearchInput('');
                         setPage(1);
                       }}
-                      className="text-xs text-slate-500 hover:text-slate-700"
+                      className="text-xs text-muted-foreground hover:text-foreground"
                     >
                       Clear
                     </button>
                   )}
                 </form>
-                <span className="ml-auto text-xs text-slate-500">
+                <span className="ml-auto text-xs text-muted-foreground">
                   {rows.data ? `${rows.data.total} row(s)` : ''}
                 </span>
               </div>
 
               {rows.isLoading ? (
-                <p className="text-sm text-slate-500">Loading…</p>
+                <p className="text-sm text-muted-foreground">Loading…</p>
               ) : rows.isError ? (
-                <p className="text-sm text-red-600">{(rows.error as Error).message}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  {(rows.error as Error).message}
+                </p>
               ) : !rows.data?.rows?.length ? (
-                <p className="text-sm text-slate-500">No rows.</p>
+                <p className="text-sm text-muted-foreground">No rows.</p>
               ) : (
-                <div className="max-h-[420px] overflow-auto rounded-lg border border-slate-200">
+                <div className="max-h-[420px] overflow-auto rounded-lg border border-border">
                   <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-slate-50">
-                      <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+                    <thead className="sticky top-0 bg-background">
+                      <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
                         {rows.data.columns.map((c) => (
                           <th key={c.name} className="whitespace-nowrap px-3 py-2 font-medium">
                             <button
                               onClick={() => sortBy(c.name)}
-                              className="inline-flex items-center gap-1 hover:text-slate-800"
+                              className="inline-flex items-center gap-1 hover:text-foreground"
                               title={c.dataType}
                             >
                               {c.name}
-                              {c.isPrimaryKey && <span className="text-amber-500">•</span>}
+                              {c.isPrimaryKey && (
+                                <span className="text-amber-500 dark:text-amber-400">•</span>
+                              )}
                               {rows.data.orderBy === c.name && (
                                 <span className="text-brand-600">
                                   {rows.data.order === 'asc' ? '↑' : '↓'}
@@ -209,12 +213,12 @@ export function DbExplorer() {
                     </thead>
                     <tbody>
                       {rows.data.rows.map((row, i) => (
-                        <tr
-                          key={i}
-                          className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
-                        >
+                        <tr key={i} className="border-b border-border last:border-0 hover:bg-muted">
                           {rows.data.columns.map((c) => (
-                            <td key={c.name} className="max-w-xs truncate px-3 py-2 text-slate-700">
+                            <td
+                              key={c.name}
+                              className="max-w-xs truncate px-3 py-2 text-foreground"
+                            >
                               <Cell value={row[c.name]} />
                             </td>
                           ))}
@@ -226,7 +230,7 @@ export function DbExplorer() {
               )}
 
               {rows.data && rows.data.total > rows.data.limit && (
-                <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+                <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
                   <span>
                     Page {rows.data.page} of {totalPages}
                   </span>

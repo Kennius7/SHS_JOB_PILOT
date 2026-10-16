@@ -93,7 +93,9 @@ function Badge({ ok }: { ok: boolean }) {
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-        ok ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        ok
+          ? 'bg-green-100 dark:bg-green-500/20 text-green-800 dark:text-green-300'
+          : 'bg-red-100 dark:bg-red-500/20 text-red-800 dark:text-red-300'
       }`}
     >
       <span className={`h-1.5 w-1.5 rounded-full ${ok ? 'bg-green-600' : 'bg-red-600'}`} />
@@ -151,15 +153,15 @@ export default function AdminPage() {
   });
 
   if (loading || !user?.isAdmin) {
-    return <div className="text-sm text-slate-500">Loading…</div>;
+    return <div className="text-sm text-muted-foreground">Loading…</div>;
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold">Admin console</h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             Platform health, job queues, and provider registry.
           </p>
         </div>
@@ -172,26 +174,26 @@ export default function AdminPage() {
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Object.entries(health.data?.checks ?? {}).map(([name, check]) => (
           <div key={name} className="card">
-            <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-900">
+            <div className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
               {name === 'database' ? (
-                <Database className="h-4 w-4 text-slate-400" />
+                <Database className="h-4 w-4 text-muted-foreground" />
               ) : (
-                <Wifi className="h-4 w-4 text-slate-400" />
+                <Wifi className="h-4 w-4 text-muted-foreground" />
               )}
               {name}
             </div>
             <Badge ok={check.ok} />
             {check.detail && (
-              <p className="mt-2 break-all text-xs text-slate-400">{check.detail}</p>
+              <p className="mt-2 break-all text-xs text-muted-foreground">{check.detail}</p>
             )}
           </div>
         ))}
         <div className="card">
-          <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-900">
-            <Server className="h-4 w-4 text-slate-400" /> Providers
+          <div className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
+            <Server className="h-4 w-4 text-muted-foreground" /> Providers
           </div>
-          <p className="text-sm text-slate-600">
-            <span className="text-green-700">
+          <p className="text-sm text-muted-foreground">
+            <span className="text-green-700 dark:text-green-400">
               {(health.data?.providers ?? [])
                 .filter((p) => p.healthy)
                 .reduce((n, p) => n + p.count, 0)}
@@ -204,18 +206,18 @@ export default function AdminPage() {
 
       {/* Queues */}
       <section className="card">
-        <div className="mb-3 flex items-center gap-2 font-medium text-slate-900">
+        <div className="mb-3 flex items-center gap-2 font-medium text-foreground">
           <Layers className="h-4 w-4" /> Job queues
         </div>
         {queues.isLoading ? (
-          <p className="text-sm text-slate-500">Loading…</p>
+          <p className="text-sm text-muted-foreground">Loading…</p>
         ) : !queues.data?.queues?.length ? (
-          <p className="text-sm text-slate-500">No queues reported.</p>
+          <p className="text-sm text-muted-foreground">No queues reported.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+                <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
                   <th className="py-2 pr-4 font-medium">Queue</th>
                   <th className="px-4 py-2 font-medium">Waiting</th>
                   <th className="px-4 py-2 font-medium">Active</th>
@@ -227,21 +229,23 @@ export default function AdminPage() {
               </thead>
               <tbody>
                 {queues.data.queues.map((q) => (
-                  <tr key={q.name} className="border-b border-slate-100 last:border-0">
-                    <td className="py-2 pr-4 font-medium text-slate-900">{q.name}</td>
+                  <tr key={q.name} className="border-b border-border last:border-0">
+                    <td className="py-2 pr-4 font-medium text-foreground">{q.name}</td>
                     <td className="px-4 py-2">{q.counts.waiting}</td>
                     <td className="px-4 py-2">{q.counts.active}</td>
                     <td className="px-4 py-2">{q.counts.delayed}</td>
-                    <td className="px-4 py-2 text-slate-500">{q.counts.completed}</td>
+                    <td className="px-4 py-2 text-muted-foreground">{q.counts.completed}</td>
                     <td
-                      className={`px-4 py-2 ${q.counts.failed > 0 ? 'text-red-600' : 'text-slate-500'}`}
+                      className={`px-4 py-2 ${q.counts.failed > 0 ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'}`}
                     >
                       {q.counts.failed}
                     </td>
                     <td className="py-2 text-right">
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          q.paused ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'
+                          q.paused
+                            ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300'
+                            : 'bg-green-100 dark:bg-green-500/20 text-green-800 dark:text-green-300'
                         }`}
                       >
                         {q.paused ? 'Paused' : 'Active'}
@@ -266,18 +270,20 @@ export default function AdminPage() {
 
       {/* Providers */}
       <section className="card">
-        <div className="mb-3 flex items-center gap-2 font-medium text-slate-900">
+        <div className="mb-3 flex items-center gap-2 font-medium text-foreground">
           <Activity className="h-4 w-4" /> Provider registry
         </div>
         {providers.isLoading ? (
-          <p className="text-sm text-slate-500">Loading…</p>
+          <p className="text-sm text-muted-foreground">Loading…</p>
         ) : !providers.data?.length ? (
-          <p className="text-sm text-slate-500">No providers registered yet. Run the seed.</p>
+          <p className="text-sm text-muted-foreground">
+            No providers registered yet. Run the seed.
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+                <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
                   <th className="py-2 pr-4 font-medium">Provider</th>
                   <th className="px-4 py-2 font-medium">Access</th>
                   <th className="px-4 py-2 font-medium">Search</th>
@@ -292,13 +298,13 @@ export default function AdminPage() {
                   const searchable = p.capabilities.searchJobs;
                   const error = p.lastError;
                   return (
-                    <tr key={p.key} className="border-b border-slate-100 align-top last:border-0">
+                    <tr key={p.key} className="border-b border-border align-top last:border-0">
                       <td className="py-2 pr-4">
-                        <p className="font-medium text-slate-900">{p.displayName}</p>
-                        <p className="text-xs text-slate-400">{p.key}</p>
+                        <p className="font-medium text-foreground">{p.displayName}</p>
+                        <p className="text-xs text-muted-foreground">{p.key}</p>
                       </td>
                       <td className="px-4 py-2">
-                        <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600">
+                        <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
                           {p.accessMode.replace(/_/g, ' ')}
                         </span>
                       </td>
@@ -309,18 +315,18 @@ export default function AdminPage() {
                       <td className="px-4 py-2">
                         {error ? (
                           <span
-                            className="inline-flex items-center gap-1 text-red-700"
+                            className="inline-flex items-center gap-1 text-red-700 dark:text-red-400"
                             title={error}
                           >
                             <XCircle className="h-3.5 w-3.5" /> error
                           </span>
                         ) : p.healthy ? (
-                          <span className="text-green-700">healthy</span>
+                          <span className="text-green-700 dark:text-green-400">healthy</span>
                         ) : (
-                          <span className="text-slate-500">idle</span>
+                          <span className="text-muted-foreground">idle</span>
                         )}
                       </td>
-                      <td className="px-4 py-2 text-xs text-slate-500">
+                      <td className="px-4 py-2 text-xs text-muted-foreground">
                         {p.lastSyncAt ? new Date(p.lastSyncAt).toLocaleString() : 'never'}
                       </td>
                       <td className="py-2 text-right">
@@ -341,7 +347,7 @@ export default function AdminPage() {
               </tbody>
             </table>
             {sync.isError && (
-              <p className="mt-3 flex items-center gap-1 text-xs text-red-600">
+              <p className="mt-3 flex items-center gap-1 text-xs text-red-600 dark:text-red-400">
                 <ShieldAlert className="h-3.5 w-3.5" /> {(sync.error as Error).message}
               </p>
             )}
@@ -351,8 +357,8 @@ export default function AdminPage() {
 
       {/* Audit log */}
       <section className="card">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-medium text-slate-900">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 font-medium text-foreground">
             <History className="h-4 w-4" /> Audit log
           </div>
           <select
@@ -361,7 +367,7 @@ export default function AdminPage() {
               setAuditAction(e.target.value);
               setAuditPage(1);
             }}
-            className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-600"
+            className="rounded-md border border-border bg-card px-2 py-1 text-xs text-muted-foreground"
           >
             <option value="">All actions</option>
             {AUDIT_ACTIONS.map((a) => (
@@ -372,15 +378,15 @@ export default function AdminPage() {
           </select>
         </div>
         {audit.isLoading ? (
-          <p className="text-sm text-slate-500">Loading…</p>
+          <p className="text-sm text-muted-foreground">Loading…</p>
         ) : !audit.data?.items?.length ? (
-          <p className="text-sm text-slate-500">No audit events recorded yet.</p>
+          <p className="text-sm text-muted-foreground">No audit events recorded yet.</p>
         ) : (
           <>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+                  <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
                     <th className="py-2 pr-4 font-medium">When</th>
                     <th className="px-4 py-2 font-medium">User</th>
                     <th className="px-4 py-2 font-medium">Action</th>
@@ -391,25 +397,27 @@ export default function AdminPage() {
                 </thead>
                 <tbody>
                   {audit.data.items.map((e) => (
-                    <tr key={e.id} className="border-b border-slate-100 align-top last:border-0">
-                      <td className="whitespace-nowrap py-2 pr-4 text-xs text-slate-500">
+                    <tr key={e.id} className="border-b border-border align-top last:border-0">
+                      <td className="whitespace-nowrap py-2 pr-4 text-xs text-muted-foreground">
                         {new Date(e.createdAt).toLocaleString()}
                       </td>
-                      <td className="px-4 py-2 text-slate-700">{e.email ?? '—'}</td>
+                      <td className="px-4 py-2 text-foreground">{e.email ?? '—'}</td>
                       <td className="px-4 py-2">
-                        <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-brand-700">
+                        <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-brand-700">
                           {e.action}
                         </code>
                       </td>
-                      <td className="px-4 py-2 text-slate-600">{e.target ?? '—'}</td>
-                      <td className="px-4 py-2 text-xs text-slate-500">{fmtMeta(e.metadata)}</td>
-                      <td className="px-4 py-2 text-xs text-slate-500">{e.ip ?? '—'}</td>
+                      <td className="px-4 py-2 text-muted-foreground">{e.target ?? '—'}</td>
+                      <td className="px-4 py-2 text-xs text-muted-foreground">
+                        {fmtMeta(e.metadata)}
+                      </td>
+                      <td className="px-4 py-2 text-xs text-muted-foreground">{e.ip ?? '—'}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+            <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
               <span>
                 Page {audit.data.page} · {audit.data.total} events
               </span>

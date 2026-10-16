@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { api, ApiError } from '@/lib/api';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const schema = z
   .object({
@@ -44,13 +45,18 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-10">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-sm">
         <form onSubmit={handleSubmit(onSubmit)} className="card space-y-4">
           <h1 className="text-xl font-semibold">Choose a new password</h1>
           {ready && !token ? (
             <>
-              <p className="text-sm text-red-600">This reset link is missing its token.</p>
+              <p className="text-sm text-red-600 dark:text-red-400">
+                This reset link is missing its token.
+              </p>
               <Link href="/forgot-password" className="btn-primary block w-full">
                 Request a new link
               </Link>
@@ -66,7 +72,9 @@ export default function ResetPasswordPage() {
                   className="input"
                 />
                 {formState.errors.password && (
-                  <p className="mt-1 text-xs text-red-600">{formState.errors.password.message}</p>
+                  <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                    {formState.errors.password.message}
+                  </p>
                 )}
               </div>
               <div>
@@ -78,10 +86,12 @@ export default function ResetPasswordPage() {
                   className="input"
                 />
                 {formState.errors.confirm && (
-                  <p className="mt-1 text-xs text-red-600">{formState.errors.confirm.message}</p>
+                  <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                    {formState.errors.confirm.message}
+                  </p>
                 )}
               </div>
-              {error && <p className="text-sm text-red-600">{error}</p>}
+              {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
               <button
                 type="submit"
                 disabled={formState.isSubmitting}

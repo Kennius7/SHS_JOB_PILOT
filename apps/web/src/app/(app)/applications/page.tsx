@@ -36,15 +36,15 @@ export default function ApplicationsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-1 border-b border-slate-200">
+      <div className="no-scrollbar flex gap-1 overflow-x-auto border-b border-border">
         {TABS.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`-mb-px border-b-2 px-4 py-2 text-sm ${
+            className={`-mb-px shrink-0 whitespace-nowrap border-b-2 px-4 py-2 text-sm ${
               tab === t.key
                 ? 'border-brand-500 font-medium text-brand-700'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
             {t.label}
@@ -53,17 +53,17 @@ export default function ApplicationsPage() {
       </div>
 
       {isLoading ? (
-        <div className="card text-sm text-slate-500">Loading…</div>
+        <div className="card text-sm text-muted-foreground">Loading…</div>
       ) : !data?.length ? (
-        <div className="card text-center text-sm text-slate-500">
-          <Clock className="mx-auto mb-3 h-8 w-8 text-slate-300" />
+        <div className="card text-center text-sm text-muted-foreground">
+          <Clock className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
           No applications in this state.
         </div>
       ) : (
         <ul className="space-y-3">
           {data.map((app) => (
             <li key={app.id} className="card">
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <Link
                     href={`/applications/${app.id}`}
@@ -71,19 +71,19 @@ export default function ApplicationsPage() {
                   >
                     {app.job.title}
                   </Link>
-                  <p className="text-sm text-slate-600">{app.job.employer}</p>
+                  <p className="text-sm text-muted-foreground">{app.job.employer}</p>
                   {app.matchScore != null && (
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       Match score: {Math.round(app.matchScore)}
                     </p>
                   )}
                   {app.lastError && (
-                    <p className="mt-2 flex items-center gap-1 text-xs text-red-600">
+                    <p className="mt-2 flex items-center gap-1 text-xs text-red-600 dark:text-red-400">
                       <AlertCircle className="h-3.5 w-3.5" /> {app.lastError}
                     </p>
                   )}
                 </div>
-                <div className="flex shrink-0 gap-2">
+                <div className="flex shrink-0 flex-wrap gap-2">
                   {app.state === 'AWAITING_APPROVAL' && (
                     <>
                       <button onClick={() => approve.mutate(app.id)} className="btn-primary">

@@ -44,7 +44,7 @@ export function PreferencesStep() {
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-semibold">Preferences</h1>
-        <p className="mt-2 text-sm text-slate-600">These shape which jobs get matched.</p>
+        <p className="mt-2 text-sm text-muted-foreground">These shape which jobs get matched.</p>
       </header>
       <div className="card space-y-5">
         <div>

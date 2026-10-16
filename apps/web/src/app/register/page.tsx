@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { useAuth } from '@/lib/auth-context';
 import { ApiError } from '@/lib/api';
 import { PasswordInput } from '@/components/password-input';
+import { ThemeToggle } from '@/components/theme-toggle';
 import Image from 'next/image';
 import logo from '../../../public/img/SHS_Job_Pilot_Logo1.png';
 
@@ -43,7 +44,10 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-10">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-sm">
         <div className="mb-8 flex items-center justify-center gap-2">
           {/* <Briefcase className="h-6 w-6 text-brand-600" /> */}
@@ -60,21 +64,25 @@ export default function RegisterPage() {
             <label className="label">Password</label>
             <PasswordInput autoComplete="new-password" {...register('password')} />
             {formState.errors.password && (
-              <p className="mt-1 text-xs text-red-600">{formState.errors.password.message}</p>
+              <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                {formState.errors.password.message}
+              </p>
             )}
           </div>
           <div>
             <label className="label">Confirm password</label>
             <PasswordInput autoComplete="new-password" {...register('confirm')} />
             {formState.errors.confirm && (
-              <p className="mt-1 text-xs text-red-600">{formState.errors.confirm.message}</p>
+              <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                {formState.errors.confirm.message}
+              </p>
             )}
           </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
           <button type="submit" disabled={formState.isSubmitting} className="btn-primary w-full">
             {formState.isSubmitting ? 'Creating account…' : 'Create account'}
           </button>
-          <p className="text-center text-sm text-slate-600">
+          <p className="text-center text-sm text-muted-foreground">
             Already have an account?{' '}
             <Link href="/login" className="text-brand-600 hover:underline">
               Sign in

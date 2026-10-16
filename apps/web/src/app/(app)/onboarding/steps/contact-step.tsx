@@ -31,7 +31,7 @@ export function ContactStep() {
     >
       <header>
         <h1 className="text-2xl font-semibold">Where are you based?</h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-muted-foreground">
           Used to filter jobs and flag sponsorship requirements.
         </p>
       </header>
@@ -64,7 +64,7 @@ export function ContactStep() {
             <input {...register('city')} className="input" />
           </div>
         </div>
-        <div className="flex gap-6 border-t border-slate-200 pt-4">
+        <div className="flex gap-6 border-t border-border pt-4">
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" {...register('workAuthorized')} /> Work authorized
           </label>

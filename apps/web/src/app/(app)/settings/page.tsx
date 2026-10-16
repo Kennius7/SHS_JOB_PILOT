@@ -73,38 +73,42 @@ export default function SettingsPage() {
       <h1 className="text-lg font-semibold">Account settings</h1>
 
       <section className="card">
-        <div className="mb-3 flex items-center gap-2 font-medium text-slate-900">
+        <div className="mb-3 flex items-center gap-2 font-medium text-foreground">
           <User className="h-4 w-4" /> Account
         </div>
         {me.isLoading ? (
-          <p className="text-sm text-slate-500">Loading…</p>
+          <p className="text-sm text-muted-foreground">Loading…</p>
         ) : (
           <dl className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
             <div>
-              <dt className="text-slate-500">Email</dt>
+              <dt className="text-muted-foreground">Email</dt>
               <dd>{me.data?.email}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Role</dt>
+              <dt className="text-muted-foreground">Role</dt>
               <dd>{me.data?.role}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Name</dt>
+              <dt className="text-muted-foreground">Name</dt>
               <dd>{me.data?.profile?.fullName ?? '—'}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Email verified</dt>
+              <dt className="text-muted-foreground">Email verified</dt>
               <dd>{me.data?.emailVerified ? 'Yes' : 'No'}</dd>
             </div>
           </dl>
         )}
         {!me.isLoading && !me.data?.emailVerified && (
-          <div className="mt-4 border-t border-slate-100 pt-4">
+          <div className="mt-4 border-t border-border pt-4">
             {resendVerification.isSuccess ? (
-              <p className="text-sm text-green-700">Verification email sent. Check your inbox.</p>
+              <p className="text-sm text-green-700 dark:text-green-400">
+                Verification email sent. Check your inbox.
+              </p>
             ) : (
               <>
-                <p className="mb-2 text-sm text-amber-600">Your email is not verified yet.</p>
+                <p className="mb-2 text-sm text-amber-600 dark:text-amber-400">
+                  Your email is not verified yet.
+                </p>
                 <button
                   onClick={() => resendVerification.mutate()}
                   className="btn-secondary"
@@ -113,7 +117,7 @@ export default function SettingsPage() {
                   {resendVerification.isPending ? 'Sending…' : 'Resend verification email'}
                 </button>
                 {resendVerification.isError && (
-                  <p className="mt-2 text-xs text-red-600">
+                  <p className="mt-2 text-xs text-red-600 dark:text-red-400">
                     {(resendVerification.error as Error).message}
                   </p>
                 )}
@@ -124,26 +128,32 @@ export default function SettingsPage() {
       </section>
 
       <section className="card">
-        <div className="mb-3 flex items-center gap-2 font-medium text-slate-900">
+        <div className="mb-3 flex items-center gap-2 font-medium text-foreground">
           <ShieldAlert className="h-4 w-4" /> Automatic application
         </div>
         {automation.isLoading ? (
-          <p className="text-sm text-slate-500">Loading…</p>
+          <p className="text-sm text-muted-foreground">Loading…</p>
         ) : automation.isError ? (
-          <p className="text-sm text-amber-600">
+          <p className="text-sm text-amber-600 dark:text-amber-400">
             Set up your career preferences before configuring automation.
           </p>
         ) : (
           <>
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-medium">
                   Status:{' '}
-                  <span className={auto?.autoSubmitEnabled ? 'text-green-700' : 'text-slate-600'}>
+                  <span
+                    className={
+                      auto?.autoSubmitEnabled
+                        ? 'text-green-700 dark:text-green-400'
+                        : 'text-muted-foreground'
+                    }
+                  >
                     {auto?.autoSubmitEnabled ? 'Running' : 'Paused'}
                   </span>
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Min match score {auto?.minMatchScore} · {auto?.usage?.submittedToday} submitted
                   today · {auto?.usage?.awaitingApproval} awaiting approval
                 </p>
@@ -168,14 +178,16 @@ export default function SettingsPage() {
               )}
             </div>
             {!auto?.hasActiveRule && (
-              <p className="text-xs text-amber-600">
+              <p className="text-xs text-amber-600 dark:text-amber-400">
                 You need an active application rule to enable automation.
               </p>
             )}
             {resume.isError && (
-              <p className="mt-2 text-xs text-red-600">{(resume.error as Error).message}</p>
+              <p className="mt-2 text-xs text-red-600 dark:text-red-400">
+                {(resume.error as Error).message}
+              </p>
             )}
-            <p className="mt-3 text-xs text-slate-500">
+            <p className="mt-3 text-xs text-muted-foreground">
               Limits: {auto?.limits?.maxApplicationsPerDay ?? 0}/day ·{' '}
               {auto?.limits?.maxApplicationsPerWeek ?? 0}/week
             </p>
@@ -184,47 +196,49 @@ export default function SettingsPage() {
       </section>
 
       <section className="card">
-        <div className="mb-3 flex items-center gap-2 font-medium text-slate-900">
+        <div className="mb-3 flex items-center gap-2 font-medium text-foreground">
           <Wallet className="h-4 w-4" /> AI usage this month
         </div>
         {usage.isLoading ? (
-          <p className="text-sm text-slate-500">Loading…</p>
+          <p className="text-sm text-muted-foreground">Loading…</p>
         ) : usage.data?.items?.length ? (
-          <table className="w-full text-sm">
-            <tbody>
-              {usage.data.items.map((i) => (
-                <tr key={i.kind} className="border-b border-slate-100 last:border-0">
-                  <td className="py-1.5">{i.kind}</td>
-                  <td className="py-1.5 text-right text-slate-500">{i.count} calls</td>
-                  <td className="py-1.5 text-right">${i.amount.toFixed(4)}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <tbody>
+                {usage.data.items.map((i) => (
+                  <tr key={i.kind} className="border-b border-border last:border-0">
+                    <td className="py-1.5">{i.kind}</td>
+                    <td className="py-1.5 text-right text-muted-foreground">{i.count} calls</td>
+                    <td className="py-1.5 text-right">${i.amount.toFixed(4)}</td>
+                  </tr>
+                ))}
+                <tr>
+                  <td className="pt-2 font-medium">Total</td>
+                  <td />
+                  <td className="pt-2 text-right font-medium">
+                    ${(usage.data.totalAmount ?? 0).toFixed(4)}
+                  </td>
                 </tr>
-              ))}
-              <tr>
-                <td className="pt-2 font-medium">Total</td>
-                <td />
-                <td className="pt-2 text-right font-medium">
-                  ${(usage.data.totalAmount ?? 0).toFixed(4)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <p className="text-sm text-slate-500">No AI usage recorded this month.</p>
+          <p className="text-sm text-muted-foreground">No AI usage recorded this month.</p>
         )}
         {usage.data && (
-          <p className="mt-2 text-xs text-slate-400">
+          <p className="mt-2 text-xs text-muted-foreground">
             Monthly budget: ${usage.data.budget.perUserMonthlyUsd}/user
           </p>
         )}
       </section>
 
-      <section className="card border-red-200">
-        <div className="mb-3 flex items-center gap-2 font-medium text-red-700">
+      <section className="card border-red-200 dark:border-red-500/30">
+        <div className="mb-3 flex items-center gap-2 font-medium text-red-700 dark:text-red-400">
           <Trash2 className="h-4 w-4" /> Danger zone
         </div>
         {confirmDelete ? (
           <div className="space-y-2">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-muted-foreground">
               This deactivates your account and revokes all sessions. Are you sure?
             </p>
             <div className="flex gap-2">
@@ -241,7 +255,10 @@ export default function SettingsPage() {
             </div>
           </div>
         ) : (
-          <button onClick={() => setConfirmDelete(true)} className="btn-secondary text-red-700">
+          <button
+            onClick={() => setConfirmDelete(true)}
+            className="btn-secondary text-red-700 dark:text-red-400"
+          >
             Delete account
           </button>
         )}

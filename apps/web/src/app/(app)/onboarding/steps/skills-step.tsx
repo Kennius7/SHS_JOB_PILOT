@@ -23,7 +23,7 @@ export function SkillsStep() {
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-semibold">Your skills</h1>
-        <p className="mt-2 text-sm text-slate-600">Used by the match engine.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Used by the match engine.</p>
       </header>
       <div className="card space-y-4">
         <div className="flex gap-2">
@@ -44,11 +44,11 @@ export function SkillsStep() {
           </button>
         </div>
         {skills.length === 0 ? (
-          <p className="text-sm text-slate-500">Add at least one skill.</p>
+          <p className="text-sm text-muted-foreground">Add at least one skill.</p>
         ) : (
           <ul className="space-y-2">
             {skills.map((s, i) => (
-              <li key={i} className="flex items-center gap-2 rounded border border-slate-200 p-2">
+              <li key={i} className="flex items-center gap-2 rounded border border-border p-2">
                 <span className="flex-1 text-sm font-medium">{s.name}</span>
                 <select
                   value={s.level ?? ''}
@@ -68,7 +68,7 @@ export function SkillsStep() {
                 </select>
                 <button
                   onClick={() => setSkills(skills.filter((_, j) => j !== i))}
-                  className="rounded p-1 text-red-500 hover:bg-red-50"
+                  className="rounded p-1 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"
                 >
                   <X className="h-4 w-4" />
                 </button>

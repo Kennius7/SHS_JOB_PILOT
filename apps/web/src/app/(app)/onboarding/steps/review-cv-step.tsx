@@ -42,7 +42,7 @@ export function ReviewCvStep() {
 
   if (!cvDoc || !edited) {
     return (
-      <div className="card text-center text-sm text-slate-500">
+      <div className="card text-center text-sm text-muted-foreground">
         No parsed CV found.{' '}
         <button onClick={next} className="text-brand-600 underline">
           Continue manually
@@ -68,7 +68,7 @@ export function ReviewCvStep() {
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-semibold">Review what we found</h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-muted-foreground">
           This is AI-extracted from your CV. Uncheck anything wrong. Nothing saves until you
           confirm.
         </p>
@@ -95,7 +95,7 @@ export function ReviewCvStep() {
           {(edited.skills ?? []).map((s: string, i: number) => (
             <span
               key={i}
-              className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs"
+              className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs"
             >
               {s}
               <button
@@ -106,7 +106,7 @@ export function ReviewCvStep() {
                   })
                 }
               >
-                <X className="h-3 w-3 text-slate-400" />
+                <X className="h-3 w-3 text-muted-foreground" />
               </button>
             </span>
           ))}
@@ -120,9 +120,9 @@ export function ReviewCvStep() {
         onToggle={() => toggle('experience')}
       >
         {(edited.experience ?? []).map((e: any, i: number) => (
-          <div key={i} className="rounded border border-slate-200 p-3 text-sm">
+          <div key={i} className="rounded border border-border p-3 text-sm">
             <div className="font-medium">{e.title}</div>
-            <div className="text-slate-600">{e.employer}</div>
+            <div className="text-muted-foreground">{e.employer}</div>
           </div>
         ))}
       </SectionBox>
@@ -136,7 +136,7 @@ export function ReviewCvStep() {
         {(edited.education ?? []).map((e: any, i: number) => (
           <div key={i} className="text-sm">
             <div className="font-medium">{e.institution}</div>
-            {e.degree && <div className="text-slate-600">{e.degree}</div>}
+            {e.degree && <div className="text-muted-foreground">{e.degree}</div>}
           </div>
         ))}
       </SectionBox>
@@ -169,7 +169,7 @@ function SectionBox({ icon, title, accepted, onToggle, children }: any) {
         </div>
         <button
           onClick={onToggle}
-          className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs ${accepted ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}
+          className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs ${accepted ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' : 'bg-muted text-muted-foreground'}`}
         >
           {accepted ? (
             <>

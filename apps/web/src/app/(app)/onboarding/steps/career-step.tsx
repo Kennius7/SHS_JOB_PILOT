@@ -31,7 +31,7 @@ export function CareerStep() {
     >
       <header>
         <h1 className="text-2xl font-semibold">What are you looking for?</h1>
-        <p className="mt-2 text-sm text-slate-600">Target roles drive the rules engine.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Target roles drive the rules engine.</p>
       </header>
       <div className="card space-y-4">
         <div>

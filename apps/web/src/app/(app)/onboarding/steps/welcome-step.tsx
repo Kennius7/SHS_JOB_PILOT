@@ -30,7 +30,7 @@ export function WelcomeStep() {
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-semibold">Welcome to SHS Job Pilot</h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-muted-foreground">
           We'll set up your career profile in under two minutes. Upload your CV and we'll pre-fill
           what we can — you'll review every field before we save it.
         </p>
@@ -46,7 +46,7 @@ export function WelcomeStep() {
         <button
           onClick={() => fileRef.current?.click()}
           disabled={status === 'uploading' || status === 'parsing'}
-          className="w-full rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 py-12 hover:border-brand-400 hover:bg-brand-50 disabled:opacity-50"
+          className="w-full rounded-lg border-2 border-dashed border-border bg-background py-12 hover:border-brand-400 hover:bg-brand-50 disabled:opacity-50"
         >
           {status === 'uploading' || status === 'parsing' ? (
             <>
@@ -57,19 +57,19 @@ export function WelcomeStep() {
             </>
           ) : (
             <>
-              <Upload className="mx-auto h-8 w-8 text-slate-400" />
+              <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
               <p className="mt-3 text-sm font-medium">Upload CV (PDF or DOCX)</p>
-              <p className="mt-1 text-xs text-slate-500">Max 10 MB</p>
+              <p className="mt-1 text-xs text-muted-foreground">Max 10 MB</p>
             </>
           )}
         </button>
         {error && (
-          <div className="rounded bg-red-50 p-3 text-sm text-red-700">
+          <div className="rounded bg-red-50 dark:bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-400">
             <FileText className="mb-1 inline h-4 w-4" /> {error}
           </div>
         )}
-        <div className="flex items-center justify-between border-t border-slate-200 pt-4">
-          <p className="text-xs text-slate-500">
+        <div className="flex items-center justify-between border-t border-border pt-4">
+          <p className="text-xs text-muted-foreground">
             No CV handy? You can fill everything in manually.
           </p>
           <button onClick={next} className="btn-secondary">

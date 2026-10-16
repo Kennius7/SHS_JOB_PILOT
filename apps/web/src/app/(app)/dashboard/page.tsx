@@ -22,12 +22,17 @@ export default function DashboardPage() {
       key: 'AWAITING_APPROVAL',
       label: 'Awaiting approval',
       icon: AlertCircle,
-      tone: 'text-amber-600',
+      tone: 'text-amber-600 dark:text-amber-400',
     },
-    { key: 'SUBMITTED', label: 'Submitted', icon: ListChecks, tone: 'text-slate-600' },
-    { key: 'CONFIRMED', label: 'Confirmed', icon: CheckCircle2, tone: 'text-green-600' },
-    { key: 'FAILED', label: 'Failed', icon: AlertCircle, tone: 'text-red-600' },
-    { key: 'DISCOVERED', label: 'Discovered', icon: FileText, tone: 'text-slate-600' },
+    { key: 'SUBMITTED', label: 'Submitted', icon: ListChecks, tone: 'text-muted-foreground' },
+    {
+      key: 'CONFIRMED',
+      label: 'Confirmed',
+      icon: CheckCircle2,
+      tone: 'text-green-600 dark:text-green-400',
+    },
+    { key: 'FAILED', label: 'Failed', icon: AlertCircle, tone: 'text-red-600 dark:text-red-400' },
+    { key: 'DISCOVERED', label: 'Discovered', icon: FileText, tone: 'text-muted-foreground' },
   ] as const;
 
   return (
@@ -49,14 +54,14 @@ export default function DashboardPage() {
           <div key={key} className="card">
             <Icon className={`h-5 w-5 ${tone}`} />
             <div className="mt-2 text-2xl font-semibold">{counts[key] ?? 0}</div>
-            <div className="text-xs text-slate-500">{label}</div>
+            <div className="text-xs text-muted-foreground">{label}</div>
           </div>
         ))}
       </div>
 
       <div className="card">
         <h2 className="text-lg font-semibold">Getting started</h2>
-        <ol className="mt-3 space-y-2 text-sm text-slate-600">
+        <ol className="mt-3 space-y-2 text-sm text-muted-foreground">
           <li>1. Upload your CV and confirm the parsed profile.</li>
           <li>2. Set target roles, states, and salary preferences.</li>
           <li>3. Define application rules and simulate against existing jobs.</li>

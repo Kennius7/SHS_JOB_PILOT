@@ -26,14 +26,14 @@ export function DoneStep() {
 
   return (
     <div className="space-y-6 text-center">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-        <CheckCircle2 className="h-8 w-8 text-green-600" />
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-500/20">
+        <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
       </div>
       <h1 className="text-2xl font-semibold">You're set up</h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <p className="mt-2 text-sm text-muted-foreground">
         From now on, we'll match new jobs against your profile and rules.
       </p>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
       <button onClick={finish} disabled={saving} className="btn-primary mx-auto">
         <Briefcase className="h-4 w-4" /> {saving ? 'Finishing…' : 'Go to dashboard'}
       </button>

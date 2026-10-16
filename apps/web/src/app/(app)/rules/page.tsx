@@ -68,7 +68,7 @@ export default function RulesPage() {
   return (
     <div className="space-y-6">
       <div className="card">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex-1">
             <label className="label">Rule name</label>
             <input
@@ -77,7 +77,7 @@ export default function RulesPage() {
               className="input max-w-sm"
             />
           </div>
-          <div className="flex gap-2 pt-6">
+          <div className="flex flex-wrap gap-2 sm:pt-6">
             <button
               onClick={() => simulate.mutate()}
               disabled={simulate.isPending}
@@ -91,16 +91,18 @@ export default function RulesPage() {
           </div>
         </div>
         {savedAt && (
-          <p className="mt-2 text-xs text-green-600">Saved at {savedAt.toLocaleTimeString()}</p>
+          <p className="mt-2 text-xs text-green-600 dark:text-green-400">
+            Saved at {savedAt.toLocaleTimeString()}
+          </p>
         )}
       </div>
 
       <div className="card space-y-3">
         <div className="flex items-start gap-3">
-          <ShieldAlert className="h-5 w-5 text-red-500" />
+          <ShieldAlert className="h-5 w-5 text-red-500 dark:text-red-400" />
           <div>
             <h2 className="font-semibold">Hard rules</h2>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-muted-foreground">
               A single failure rejects the job outright. AI scores cannot override these.
             </p>
           </div>
@@ -124,10 +126,10 @@ export default function RulesPage() {
 
       <div className="card space-y-3">
         <div className="flex items-start gap-3">
-          <ShieldCheck className="h-5 w-5 text-green-500" />
+          <ShieldCheck className="h-5 w-5 text-green-500 dark:text-green-400" />
           <div>
             <h2 className="font-semibold">Soft rules</h2>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-muted-foreground">
               Contribute to a pass ratio. Below the ratio → job moves to REVIEW.
             </p>
           </div>
@@ -185,16 +187,28 @@ export default function RulesPage() {
           </div>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <Stat label="Evaluated" value={simulation.evaluated} />
-            <Stat label="Eligible" value={simulation.eligible} tone="text-green-600" />
-            <Stat label="Review" value={simulation.review} tone="text-amber-600" />
-            <Stat label="Ineligible" value={simulation.ineligible} tone="text-red-600" />
+            <Stat
+              label="Eligible"
+              value={simulation.eligible}
+              tone="text-green-600 dark:text-green-400"
+            />
+            <Stat
+              label="Review"
+              value={simulation.review}
+              tone="text-amber-600 dark:text-amber-400"
+            />
+            <Stat
+              label="Ineligible"
+              value={simulation.ineligible}
+              tone="text-red-600 dark:text-red-400"
+            />
           </div>
         </div>
       )}
 
       <details className="card">
         <summary className="cursor-pointer text-sm font-medium">Raw JSON (advanced)</summary>
-        <pre className="mt-3 max-h-96 overflow-auto rounded bg-slate-50 p-3 text-xs">
+        <pre className="mt-3 max-h-96 overflow-auto rounded bg-background p-3 text-xs">
           {JSON.stringify(draft, null, 2)}
         </pre>
       </details>
@@ -212,11 +226,11 @@ function ConditionRow({
   onRemove: () => void;
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-background p-3 sm:flex-row sm:items-start">
       <select
         value={condition.type}
         onChange={(e) => onChange(defaultFor(e.target.value))}
-        className="input max-w-xs"
+        className="input sm:max-w-xs"
       >
         <option value="STATE_IN">State is one of</option>
         <option value="WORK_ARRANGEMENT_IN">Work arrangement is one of</option>
@@ -307,7 +321,7 @@ function ConditionRow({
               }
               className="input max-w-[160px]"
             />
-            <span className="self-center text-xs text-slate-500">NGN / year</span>
+            <span className="self-center text-xs text-muted-foreground">NGN / year</span>
           </div>
         )}
         {condition.type === 'POSTED_WITHIN_DAYS' && (
@@ -335,7 +349,10 @@ function ConditionRow({
           />
         )}
       </div>
-      <button onClick={onRemove} className="rounded p-2 text-red-500 hover:bg-red-50">
+      <button
+        onClick={onRemove}
+        className="self-end rounded p-2 text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10 sm:self-start"
+      >
         <Trash2 className="h-4 w-4" />
       </button>
     </div>
@@ -345,7 +362,7 @@ function ConditionRow({
 function Stat({
   label,
   value,
-  tone = 'text-slate-900',
+  tone = 'text-foreground',
 }: {
   label: string;
   value: number;
@@ -353,7 +370,7 @@ function Stat({
 }) {
   return (
     <div>
-      <div className="text-xs text-slate-500">{label}</div>
+      <div className="text-xs text-muted-foreground">{label}</div>
       <div className={`text-xl font-semibold ${tone}`}>{value}</div>
     </div>
   );
